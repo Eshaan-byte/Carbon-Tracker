@@ -30,13 +30,74 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const validateField = (field: keyof ActivityInput, value: number) => {
+    if (value <= 0) {
+      if (field.includes('Hours')) {
+        return 'Duration must be greater than 0';
+      } else if (field === 'emails' || field === 'cloudStorageGB') {
+        return 'Quantity must be greater than 0';
+      }
+    }
+    return '';
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    let hasActivity = false;
+
+    formFields.forEach(field => {
+      const value = activities[field.key];
+      if (value > 0) {
+        hasActivity = true;
+      }
+      // Check individual field errors if touched
+      if (touched[field.key]) {
+        const error = validateField(field.key, value);
+        if (error) {
+          newErrors[field.key] = error;
+        }
+      }
+    });
+
+    if (!hasActivity) {
+      newErrors.form = 'Please select at least one activity';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (field: keyof ActivityInput, value: number) => {
     setActivities(prev => ({ ...prev, [field]: Math.max(0, value) }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleBlur = (field: keyof ActivityInput) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const error = validateField(field, activities[field]);
+    setErrors(prev => ({ ...prev, [field]: error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Mark all fields as touched
+    const allTouched: Record<string, boolean> = {};
+    formFields.forEach(field => {
+      allTouched[field.key] = true;
+    });
+    setTouched(allTouched);
+    
+    if (!validateForm()) {
+      return; // Don't submit if invalid
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -56,6 +117,8 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
           gamingHours: 0,
           socialMediaHours: 0,
         });
+        setErrors({});
+        setTouched({});
         setIsSubmitting(false);
       }, 500);
       
@@ -160,7 +223,12 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                       step={field.step}
                       value={activities[field.key]}
                       onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value))}
-                      className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      onBlur={() => handleBlur(field.key)}
+                      className={`flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
+                        errors[field.key] ? 'border border-red-500' : ''
+                      }`}
+                      aria-invalid={!!errors[field.key]}
+                      aria-describedby={`${field.key}-error ${field.key}-hint`}
                     />
                     <div className="flex items-center space-x-2">
                       <input
@@ -170,7 +238,14 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                         step={field.step}
                         value={activities[field.key]}
                         onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value) || 0)}
-                        className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        onBlur={() => handleBlur(field.key)}
+                        className={`w-20 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-gray-900 ${
+                          errors[field.key] 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-green-500'
+                        }`}
+                        aria-invalid={!!errors[field.key]}
+                        aria-describedby={`${field.key}-error ${field.key}-hint`}
                       />
                       <span className="text-sm text-gray-500 min-w-fit">
                         {field.key.includes('Hours') ? 'hrs' : 
@@ -187,15 +262,42 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                       style={{ width: `${(activities[field.key] / field.max) * 100}%` }}
                     ></div>
                   </div>
+
+                  {/* Hint */}
+                  <p id={`${field.key}-hint`} className="text-xs text-gray-500 mt-1">
+                    {field.key.includes('Hours') 
+                      ? `Enter duration in ${field.key.includes('streaming') || field.key.includes('gaming') ? 'hours' : 'hours'} (e.g., 2.5)` 
+                      : field.key === 'emails' 
+                      ? 'Enter number of emails sent today' 
+                      : field.key === 'cloudStorageGB' 
+                      ? 'Enter storage used in GB' 
+                      : 'Enter quantity'}
+                  </p>
+
+                  {/* Error message */}
+                  {errors[field.key] && (
+                    <p id={`${field.key}-error`} className="text-sm text-red-600 mt-1" role="alert">
+                      {errors[field.key]}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
+          {/* Form error message */}
+          {errors.form && (
+            <div className="text-center">
+              <p className="text-sm text-red-600" role="alert">
+                {errors.form}
+              </p>
+            </div>
+          )}
+
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || Object.keys(errors).length > 0}
               className="px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
             >
               {isSubmitting ? (
