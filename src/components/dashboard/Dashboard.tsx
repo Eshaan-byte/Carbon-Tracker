@@ -9,6 +9,7 @@ import {
 } from "@/lib/calculations/carbonFootprint";
 import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
+import ShareButton from "@/components/ui/ShareButton";
 import { getUserFootprints } from "@/lib/firebase/firestore";
 
 type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact";
@@ -37,13 +38,12 @@ function StatCard({ title, value, change, icon, color }: StatCardProps) {
           <p className={`text-2xl font-bold ${color}`}>{value}</p>
           {change !== undefined && (
             <p
-              className={`text-sm mt-1 ${
-                change > 0
+              className={`text-sm mt-1 ${change > 0
                   ? "text-red-600"
                   : change < 0
-                  ? "text-green-600"
-                  : "text-gray-600"
-              }`}
+                    ? "text-green-600"
+                    : "text-gray-600"
+                }`}
             >
               {change > 0 ? "↗" : change < 0 ? "↘" : "→"}{" "}
               {Math.abs(change).toFixed(1)}% from last week
@@ -248,6 +248,13 @@ export default function Dashboard({
           <p className="text-gray-600">
             Track your digital footprint and make a positive impact 🌍
           </p>
+          {/* Share Button */}
+          <div className="mt-4 flex justify-center">
+            <ShareButton
+              co2Amount={dashboardData.todayFootprint}
+              period="today"
+            />
+          </div>
         </div>
 
         {/* Stats Cards */}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Badge } from '@/types';
 import { BADGE_TEMPLATES, RARITY_COLORS, RARITY_LABELS, getBadgeTemplate } from '@/constants/badges';
+import ShareButton from '@/components/ui/ShareButton';
 
 interface BadgeDisplayProps {
   userBadges: Badge[];
@@ -24,37 +25,33 @@ function BadgeCard({ badge, isEarned, onClick }: BadgeCardProps) {
   return (
     <div
       onClick={onClick}
-      className={`relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
-        isEarned
-          ? `${RARITY_COLORS[rarity]} border-current shadow-lg`
-          : 'bg-gray-50 border-gray-200 opacity-50'
-      }`}
+      className={`relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:scale-105 ${isEarned
+        ? `${RARITY_COLORS[rarity]} border-current shadow-lg`
+        : 'bg-gray-50 border-gray-200 opacity-50'
+        }`}
     >
       {/* Badge Icon */}
       <div className="text-center mb-3">
         <div className={`text-4xl mb-2 ${isEarned ? '' : 'grayscale'}`}>
           {badge.icon}
         </div>
-        <div className={`text-xs font-medium px-2 py-1 rounded-full ${
-          isEarned ? RARITY_COLORS[rarity] : 'bg-gray-200 text-gray-500'
-        }`}>
+        <div className={`text-xs font-medium px-2 py-1 rounded-full ${isEarned ? RARITY_COLORS[rarity] : 'bg-gray-200 text-gray-500'
+          }`}>
           {RARITY_LABELS[rarity]}
         </div>
       </div>
 
       {/* Badge Info */}
       <div className="text-center">
-        <h3 className={`font-bold text-sm mb-1 ${
-          isEarned ? 'text-gray-900' : 'text-gray-400'
-        }`}>
+        <h3 className={`font-bold text-sm mb-1 ${isEarned ? 'text-gray-900' : 'text-gray-400'
+          }`}>
           {badge.name}
         </h3>
-        <p className={`text-xs leading-tight mb-2 ${
-          isEarned ? 'text-gray-600' : 'text-gray-400'
-        }`}>
+        <p className={`text-xs leading-tight mb-2 ${isEarned ? 'text-gray-600' : 'text-gray-400'
+          }`}>
           {badge.description}
         </p>
-        
+
         {isEarned && (
           <div className="flex items-center justify-center space-x-2 text-xs">
             <span className="text-yellow-600">⭐ {points} pts</span>
@@ -75,12 +72,12 @@ function BadgeCard({ badge, isEarned, onClick }: BadgeCardProps) {
       )}
 
       {/* New badge indicator */}
-      {isEarned && badge.achievedAt && 
-       new Date().getTime() - badge.achievedAt.getTime() < 7 * 24 * 60 * 60 * 1000 && (
-        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-          NEW!
-        </div>
-      )}
+      {isEarned && badge.achievedAt &&
+        new Date().getTime() - badge.achievedAt.getTime() < 7 * 24 * 60 * 60 * 1000 && (
+          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+            NEW!
+          </div>
+        )}
     </div>
   );
 }
@@ -106,16 +103,16 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
   });
 
   // Filter badges by category
-  const filteredBadges = selectedCategory === 'all' 
-    ? allBadges 
+  const filteredBadges = selectedCategory === 'all'
+    ? allBadges
     : allBadges.filter(badge => {
-        const template = getBadgeTemplate(badge.id);
-        return template?.category === selectedCategory;
-      });
+      const template = getBadgeTemplate(badge.id);
+      return template?.category === selectedCategory;
+    });
 
   // Show only earned badges if not showing all
-  const displayBadges = showAll 
-    ? filteredBadges 
+  const displayBadges = showAll
+    ? filteredBadges
     : filteredBadges.filter(badge => badge.achieved);
 
   const categories = [
@@ -142,7 +139,7 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
             {earnedCount} badges earned • {totalPoints} points
           </p>
         </div>
-        
+
         <div className="text-right">
           <div className="text-2xl font-bold text-green-600">{earnedCount}</div>
           <div className="text-sm text-gray-500">badges</div>
@@ -155,11 +152,10 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
           <button
             key={category.value}
             onClick={() => setSelectedCategory(category.value)}
-            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedCategory === category.value
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-green-50'
-            }`}
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === category.value
+              ? 'bg-green-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-green-50'
+              }`}
           >
             <span>{category.icon}</span>
             <span>{category.label}</span>
@@ -174,7 +170,7 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
             <input
               type="checkbox"
               checked={showAll}
-              onChange={() => {}} // This would be controlled by parent
+              onChange={() => { }} // This would be controlled by parent
               className="rounded"
             />
             <span>Show locked badges</span>
@@ -215,12 +211,22 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
               <h3 className="text-xl font-bold text-gray-900">{selectedBadge.name}</h3>
               <p className="text-gray-600 mt-2">{selectedBadge.description}</p>
             </div>
-            
+
             {selectedBadge.achieved ? (
-              <div className="text-center">
-                <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full">
-                  <span>✅</span>
-                  <span>Achieved on {selectedBadge.achievedAt?.toLocaleDateString()}</span>
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full">
+                    <span>✅</span>
+                    <span>Achieved on {selectedBadge.achievedAt?.toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                {/* Share Button for achieved badges */}
+                <div className="flex justify-center">
+                  <ShareButton
+                    co2Amount={0}
+                    customMessage={`I just earned the "${selectedBadge.name}" badge on Carbon Tracker! 🏆 #CarbonFootprint`}
+                  />
                 </div>
               </div>
             ) : (
@@ -231,7 +237,7 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
                 </div>
               </div>
             )}
-            
+
             <button
               onClick={() => setSelectedBadge(null)}
               className="w-full mt-6 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
