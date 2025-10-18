@@ -1,21 +1,20 @@
 // src/utils/activityIcons.tsx
 import { 
-  Mail, 
-  Tv, 
-  Code, 
-  Video, 
-  Cloud, 
-  Gamepad2, 
-  Share2,
-  LucideIcon 
-} from 'lucide-react';
+  EnvelopeIcon,
+  TvIcon,
+  CodeBracketIcon,
+  VideoCameraIcon,
+  CloudIcon,
+  PuzzlePieceIcon,
+  ShareIcon,
+} from '@heroicons/react/24/outline';
 import { ActivityType } from '@/types';
 
 // Impact levels based on CO2 emissions per unit
 export type ImpactLevel = 'low' | 'medium' | 'high';
 
 interface ActivityIconConfig {
-  icon: LucideIcon;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   impactLevel: ImpactLevel;
   color: string;
   bgColor: string;
@@ -26,49 +25,49 @@ interface ActivityIconConfig {
 // Low: < 10g, Medium: 10-50g, High: > 50g
 export const ACTIVITY_ICONS: Record<ActivityType, ActivityIconConfig> = {
   emails: {
-    icon: Mail,
+    icon: EnvelopeIcon,
     impactLevel: 'low',
     color: 'text-green-600',
     bgColor: 'bg-green-100',
     borderColor: 'border-green-200',
   },
   streaming: {
-    icon: Tv,
+    icon: TvIcon,
     impactLevel: 'high',
     color: 'text-red-600',
     bgColor: 'bg-red-100',
     borderColor: 'border-red-200',
   },
   coding: {
-    icon: Code,
+    icon: CodeBracketIcon,
     impactLevel: 'medium',
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-100',
     borderColor: 'border-yellow-200',
   },
   video_calls: {
-    icon: Video,
+    icon: VideoCameraIcon,
     impactLevel: 'high',
     color: 'text-red-600',
     bgColor: 'bg-red-100',
     borderColor: 'border-red-200',
   },
   cloud_storage: {
-    icon: Cloud,
+    icon: CloudIcon,
     impactLevel: 'low',
     color: 'text-green-600',
     bgColor: 'bg-green-100',
     borderColor: 'border-green-200',
   },
   gaming: {
-    icon: Gamepad2,
+    icon: PuzzlePieceIcon,
     impactLevel: 'high',
     color: 'text-red-600',
     bgColor: 'bg-red-100',
     borderColor: 'border-red-200',
   },
   social_media: {
-    icon: Share2,
+    icon: ShareIcon,
     impactLevel: 'medium',
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-100',
@@ -108,8 +107,8 @@ export function ActivityIcon({
         `}
       >
         <Icon 
-          size={size} 
-          className={config.color}
+          className={`${config.color}`}
+          style={{ width: size, height: size }}
           strokeWidth={2}
         />
       </div>
@@ -118,8 +117,8 @@ export function ActivityIcon({
 
   return (
     <Icon 
-      size={size} 
       className={`${config.color} ${className}`}
+      style={{ width: size, height: size }}
       strokeWidth={2}
     />
   );
