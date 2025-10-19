@@ -4,6 +4,7 @@ export interface Activity {
   value: number;
   date: Date;
   userId: string;
+  emoji?: string;
 }
 
 export type ActivityType = 

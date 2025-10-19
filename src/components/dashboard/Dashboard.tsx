@@ -10,6 +10,7 @@ import {
 import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
 import { getUserFootprints } from "@/lib/firebase/firestore";
+import { ACTIVITY_EMOJIS } from "@/constants/co2Factors";
 
 interface StatCardProps {
   title: string;
@@ -326,8 +327,11 @@ export default function Dashboard({
                           (value as number) > 0 ? (
                             <span
                               key={activity}
-                              className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full"
+                              className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1"
                             >
+                              <span className="text-sm">
+                                {ACTIVITY_EMOJIS[activity as ActivityType] || '📊'}
+                              </span>
                               {activity}: {value as number}
                             </span>
                           ) : null
