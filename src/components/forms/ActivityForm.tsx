@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ActivityInput } from '@/types';
 import { calculateCarbonFootprint } from '@/lib/calculations/carbonFootprint';
-import { ACTIVITY_LABELS, ACTIVITY_DESCRIPTIONS } from '@/constants/co2Factors';
+import { ACTIVITY_LABELS, ACTIVITY_DESCRIPTIONS, ACTIVITY_EMOJIS } from '@/constants/co2Factors';
 
 interface ActivityFormProps {
   onSubmit: (
@@ -135,7 +135,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       description: ACTIVITY_DESCRIPTIONS.emails,
       max: 500,
       step: 1,
-      icon: '📧',
+      icon: ACTIVITY_EMOJIS.emails,
     },
     {
       key: 'streamingHours' as keyof ActivityInput,
@@ -143,7 +143,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       description: ACTIVITY_DESCRIPTIONS.streaming,
       max: 24,
       step: 0.5,
-      icon: '📺',
+      icon: ACTIVITY_EMOJIS.streaming,
     },
     {
       key: 'codingHours' as keyof ActivityInput,
@@ -151,7 +151,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       description: ACTIVITY_DESCRIPTIONS.coding,
       max: 24,
       step: 0.5,
-      icon: '💻',
+      icon: ACTIVITY_EMOJIS.coding,
     },
     {
       key: 'videoCallHours' as keyof ActivityInput,
@@ -159,7 +159,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       description: ACTIVITY_DESCRIPTIONS.video_calls,
       max: 24,
       step: 0.5,
-      icon: '📹',
+      icon: ACTIVITY_EMOJIS.video_calls,
     },
     {
       key: 'cloudStorageGB' as keyof ActivityInput,
@@ -167,7 +167,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       description: ACTIVITY_DESCRIPTIONS.cloud_storage,
       max: 1000,
       step: 1,
-      icon: '☁️',
+      icon: ACTIVITY_EMOJIS.cloud_storage,
     },
     {
       key: 'gamingHours' as keyof ActivityInput,
@@ -175,7 +175,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       description: ACTIVITY_DESCRIPTIONS.gaming,
       max: 24,
       step: 0.5,
-      icon: '🎮',
+      icon: ACTIVITY_EMOJIS.gaming,
     },
     {
       key: 'socialMediaHours' as keyof ActivityInput,
@@ -183,7 +183,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       description: ACTIVITY_DESCRIPTIONS.social_media,
       max: 24,
       step: 0.5,
-      icon: '📱',
+      icon: ACTIVITY_EMOJIS.social_media,
     },
   ];
 

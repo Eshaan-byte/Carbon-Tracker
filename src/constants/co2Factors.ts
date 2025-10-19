@@ -56,3 +56,14 @@ export const ACTIVITY_DESCRIPTIONS: Record<ActivityType, string> = {
   gaming: 'Hours spent gaming online',
   social_media: 'Hours browsing social media platforms',
 };
+
+// Activity emojis for UI
+export const ACTIVITY_EMOJIS: Record<ActivityType, string> = {
+  emails: '📧',
+  streaming: '🎬',
+  coding: '💻',
+  video_calls: '📹',
+  cloud_storage: '☁️',
+  gaming: '🎮',
+  social_media: '🌐',
+};

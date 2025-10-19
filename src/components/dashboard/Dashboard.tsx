@@ -11,6 +11,7 @@ import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
 import ShareButton from "@/components/ui/ShareButton";
 import { getUserFootprints } from "@/lib/firebase/firestore";
+import { ACTIVITY_EMOJIS } from "@/constants/co2Factors";
 import { exportToCSV, ActivityHistoryEntry } from "@/utils/exportCSV";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
@@ -40,12 +41,13 @@ function StatCard({ title, value, change, icon, color }: StatCardProps) {
           <p className={`text-2xl font-bold ${color}`}>{value}</p>
           {change !== undefined && (
             <p
-              className={`text-sm mt-1 ${change > 0
+              className={`text-sm mt-1 ${
+                change > 0
                   ? "text-red-600"
                   : change < 0
-                    ? "text-green-600"
-                    : "text-gray-600"
-                }`}
+                  ? "text-green-600"
+                  : "text-gray-600"
+              }`}
             >
               {change > 0 ? "↗" : change < 0 ? "↘" : "→"}{" "}
               {Math.abs(change).toFixed(1)}% from last week
@@ -104,10 +106,9 @@ export default function Dashboard({
     show: boolean;
     success: boolean;
     message: string;
-  }>({ show: false, success: false, message: '' });
+  }>({ show: false, success: false, message: "" });
 
   useEffect(() => {
-    // Use prop data if available, otherwise fetch from database
     if (propDashboardData) {
       setDashboardData(propDashboardData);
       setLoading(false);
@@ -121,7 +122,6 @@ export default function Dashboard({
         setLoading(true);
         const footprints = await getUserFootprints(user.id, 30);
 
-        // Calculate dashboard metrics
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -147,7 +147,6 @@ export default function Dashboard({
           .filter((f) => f.date >= monthStart)
           .reduce((sum, f) => sum + f.totalCO2, 0);
 
-        // Calculate weekly breakdown
         const weeklyBreakdown: Record<ActivityType, number> = {
           emails: 0,
           streaming: 0,
@@ -166,7 +165,6 @@ export default function Dashboard({
             });
           });
 
-        // Generate trend data (last 7 days)
         const trend = [];
         for (let i = 6; i >= 0; i--) {
           const date = new Date(today);
@@ -205,25 +203,22 @@ export default function Dashboard({
     fetchDashboardData();
   }, [user, propDashboardData]);
 
-  // Update dashboard when prop data changes
   useEffect(() => {
     if (propDashboardData) {
       setDashboardData(propDashboardData);
     }
   }, [propDashboardData]);
 
-  // Handle CSV export
   const handleExportCSV = () => {
     const result = exportToCSV(activityHistory as ActivityHistoryEntry[]);
     setExportStatus({
       show: true,
       success: result.success,
-      message: result.message
+      message: result.message,
     });
-    
-    // Hide the message after 4 seconds
+
     setTimeout(() => {
-      setExportStatus(prev => ({ ...prev, show: false }));
+      setExportStatus((prev) => ({ ...prev, show: false }));
     }, 4000);
   };
 
@@ -270,7 +265,6 @@ export default function Dashboard({
           <p className="text-gray-600">
             Track your digital footprint and make a positive impact 🌍
           </p>
-          {/* Share Button */}
           <div className="mt-4 flex justify-center">
             <ShareButton
               co2Amount={dashboardData.todayFootprint}
@@ -301,19 +295,15 @@ export default function Dashboard({
           />
         </div>
 
-        {/* Comparison Section */}
         <ComparisonSection dashboardData={dashboardData} />
 
-        {/* Charts Section */}
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Weekly Breakdown Pie Chart */}
           <FootprintChart
             type="pie"
             data={dashboardData.weeklyBreakdown}
             title="Weekly Activity Breakdown"
           />
 
-          {/* Trend Line Chart */}
           <FootprintChart
             type="line"
             data={{
@@ -324,7 +314,6 @@ export default function Dashboard({
           />
         </div>
 
-        {/* Equivalents Section */}
         {dashboardData.equivalents.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
@@ -344,14 +333,13 @@ export default function Dashboard({
           </div>
         )}
 
-        {/* Recent Activities / Activity History (UPDATED SECTION) */}
+        {/* ✅ Merged and fixed activity history section */}
         {activityHistory.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">
                 Activity History
               </h3>
-              {/* NEW: Sort Dropdown UI */}
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-medium text-gray-700">Sort by:</span>
                 <div className="relative">
@@ -366,21 +354,31 @@ export default function Dashboard({
                       </option>
                     ))}
                   </select>
-                  {/* Custom chevron/sort icon */}
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h18M3 8h18m-6 4h6m-6 4h6M3 16h6m-6 4h6"></path></svg>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 4h18M3 8h18m-6 4h6m-6 4h6M3 16h6m-6 4h6"
+                      ></path>
+                    </svg>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Sorted Activity List */}
             <div className="space-y-4">
               {activityHistory.map((entry: any) => (
                 <div key={entry.id} className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">
-                      {/* Using toLocaleString for better date/time display */}
                       {entry.timestamp.toLocaleString()}
                     </span>
                     <span className="font-bold text-green-600">
@@ -388,16 +386,18 @@ export default function Dashboard({
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries(entry.activities).map(
-                      ([activity, value]) =>
-                        (value as number) > 0 ? (
-                          <span
-                            key={activity}
-                            className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full"
-                          >
-                            {activity}: {value as number}
+                    {Object.entries(entry.activities).map(([activity, value]) =>
+                      (value as number) > 0 ? (
+                        <span
+                          key={activity}
+                          className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1"
+                        >
+                          <span className="text-sm">
+                            {ACTIVITY_EMOJIS[activity as ActivityType] || "📊"}
                           </span>
-                        ) : null
+                          {activity}: {value as number}
+                        </span>
+                      ) : null
                     )}
                   </div>
                 </div>
@@ -444,18 +444,17 @@ export default function Dashboard({
         </div>
       </div>
 
-      {/* Export Status Toast */}
       {exportStatus.show && (
         <div className="fixed top-4 right-4 z-50">
           <div
             className={`px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 ${
               exportStatus.success
-                ? 'bg-green-500 text-white'
-                : 'bg-red-500 text-white'
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
             }`}
           >
             <span className="text-lg">
-              {exportStatus.success ? '✅' : '❌'}
+              {exportStatus.success ? "✅" : "❌"}
             </span>
             <span className="font-medium">{exportStatus.message}</span>
           </div>

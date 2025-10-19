@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { ActivityType } from '@/types';
 import { TIPS_DATABASE, getCategoryTips, getTopImpactTips, getRandomTips } from '@/constants/tips';
 import { formatCO2Amount } from '@/lib/calculations/carbonFootprint';
-import { ACTIVITY_LABELS } from '@/constants/co2Factors';
+import { ACTIVITY_LABELS, ACTIVITY_EMOJIS } from '@/constants/co2Factors';
 
 interface TipsPanelProps {
   userFootprint?: Record<ActivityType, number>;
@@ -40,8 +40,9 @@ function TipCard({ tip, onApply }: TipCardProps) {
           </div>
           <p className="text-gray-600 mb-4 leading-relaxed">{tip.description}</p>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-              {ACTIVITY_LABELS[tip.category]}
+            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1">
+              <span>{ACTIVITY_EMOJIS[tip.category as ActivityType]}</span>
+              <span>{ACTIVITY_LABELS[tip.category as ActivityType]}</span>
             </span>
             <button
               onClick={handleApply}
@@ -107,13 +108,13 @@ export default function TipsPanel({ userFootprint, className = '' }: TipsPanelPr
   const categories: Array<{ value: 'all' | 'personalized' | ActivityType; label: string; icon: string }> = [
     { value: 'personalized', label: 'For You', icon: '🎯' },
     { value: 'all', label: 'All Tips', icon: '💡' },
-    { value: 'emails', label: 'Emails', icon: '📧' },
-    { value: 'streaming', label: 'Streaming', icon: '📺' },
-    { value: 'coding', label: 'Coding', icon: '💻' },
-    { value: 'video_calls', label: 'Video Calls', icon: '📹' },
-    { value: 'cloud_storage', label: 'Cloud Storage', icon: '☁️' },
-    { value: 'gaming', label: 'Gaming', icon: '🎮' },
-    { value: 'social_media', label: 'Social Media', icon: '📱' },
+    { value: 'emails', label: 'Emails', icon: ACTIVITY_EMOJIS.emails },
+    { value: 'streaming', label: 'Streaming', icon: ACTIVITY_EMOJIS.streaming },
+    { value: 'coding', label: 'Coding', icon: ACTIVITY_EMOJIS.coding },
+    { value: 'video_calls', label: 'Video Calls', icon: ACTIVITY_EMOJIS.video_calls },
+    { value: 'cloud_storage', label: 'Cloud Storage', icon: ACTIVITY_EMOJIS.cloud_storage },
+    { value: 'gaming', label: 'Gaming', icon: ACTIVITY_EMOJIS.gaming },
+    { value: 'social_media', label: 'Social Media', icon: ACTIVITY_EMOJIS.social_media },
   ];
 
   const totalPotentialSaving = tips.reduce((sum, tip) => sum + tip.potentialSaving, 0);

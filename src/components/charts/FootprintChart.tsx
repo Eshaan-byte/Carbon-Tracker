@@ -15,7 +15,7 @@ import {
 } from "chart.js";
 import { Line, Pie, Bar } from "react-chartjs-2";
 import { ActivityType } from "@/types";
-import { ACTIVITY_LABELS } from "@/constants/co2Factors";
+import { ACTIVITY_LABELS, ACTIVITY_EMOJIS } from "@/constants/co2Factors";
 import { formatCO2Amount } from "@/lib/calculations/carbonFootprint";
 
 ChartJS.register(
@@ -73,7 +73,7 @@ export default function FootprintChart({
           text: title,
           font: {
             size: 16,
-            weight: "bold",
+            weight: 'bold' as const,
           },
           padding: 20,
         },
@@ -146,7 +146,7 @@ export default function FootprintChart({
     if (type === "pie") {
       return {
         labels: Object.keys(data).map(
-          (key) => ACTIVITY_LABELS[key as ActivityType] || key
+          (key) => `${ACTIVITY_EMOJIS[key as ActivityType] || '📊'} ${ACTIVITY_LABELS[key as ActivityType] || key}`
         ),
         datasets: [
           {
@@ -182,7 +182,7 @@ export default function FootprintChart({
     if (type === "bar") {
       return {
         labels: Object.keys(data).map(
-          (key) => ACTIVITY_LABELS[key as ActivityType] || key
+          (key) => `${ACTIVITY_EMOJIS[key as ActivityType] || '📊'} ${ACTIVITY_LABELS[key as ActivityType] || key}`
         ),
         datasets: [
           {

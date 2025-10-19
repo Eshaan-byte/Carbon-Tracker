@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import { ActivityType } from '@/types';
-import { CO2_FACTORS, ACTIVITY_LABELS } from '@/constants/co2Factors';
+import { CO2_FACTORS, ACTIVITY_LABELS, ACTIVITY_EMOJIS } from '@/constants/co2Factors';
 
 interface QuickEntryProps {
   onQuickAdd: (activity: ActivityType, value: number) => void;
 }
 
 const quickActions = [
-  { type: 'emails' as ActivityType, values: [1, 5, 10, 25], unit: 'emails', icon: '📧' },
-  { type: 'streaming' as ActivityType, values: [0.5, 1, 2, 4], unit: 'hours', icon: '📺' },
-  { type: 'video_calls' as ActivityType, values: [0.5, 1, 2, 3], unit: 'hours', icon: '📹' },
-  { type: 'gaming' as ActivityType, values: [0.5, 1, 2, 4], unit: 'hours', icon: '🎮' },
+  { type: 'emails' as ActivityType, values: [1, 5, 10, 25], unit: 'emails', icon: ACTIVITY_EMOJIS.emails },
+  { type: 'streaming' as ActivityType, values: [0.5, 1, 2, 4], unit: 'hours', icon: ACTIVITY_EMOJIS.streaming },
+  { type: 'video_calls' as ActivityType, values: [0.5, 1, 2, 3], unit: 'hours', icon: ACTIVITY_EMOJIS.video_calls },
+  { type: 'gaming' as ActivityType, values: [0.5, 1, 2, 4], unit: 'hours', icon: ACTIVITY_EMOJIS.gaming },
 ];
 
 export default function QuickEntry({ onQuickAdd }: QuickEntryProps) {
