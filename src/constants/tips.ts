@@ -34,6 +34,38 @@ export const TIPS_DATABASE: Tip[] = [
     potentialSaving: 40,
     icon: '📧',
   },
+  {
+    id: 'email-5',
+    title: 'Unsubscribe from Unwanted Newsletters',
+    description: 'Stop receiving emails you never read by unsubscribing regularly.',
+    category: 'emails',
+    potentialSaving: 35,
+    icon: '📧',
+  },
+  {
+    id: 'email-6',
+    title: 'Limit Large Attachments',
+    description: 'Use cloud links instead of sending large files as attachments.',
+    category: 'emails',
+    potentialSaving: 28,
+    icon: '📎'
+  },
+  {
+    id: 'email-7',
+    title: 'Set Up Email Filters',
+    description: 'Automatically archive or delete emails you don’t need to keep your inbox clean.',
+    category: 'emails',
+    potentialSaving: 18,
+    icon: '🧹'
+  },
+  {
+    id: 'email-8',
+    title: 'Schedule Email Checks',
+    description: 'Check your inbox at set intervals instead of constantly syncing in the background.',
+    category: 'emails',
+    potentialSaving: 22,
+    icon: '⏰'
+  },
 
   // Streaming Tips
   {
@@ -67,6 +99,38 @@ export const TIPS_DATABASE: Tip[] = [
     category: 'streaming',
     potentialSaving: 60,
     icon: '📺',
+  },
+  {
+    id: 'streaming-5',
+    title: 'Turn Off Subtitles When Not Needed',
+    description: 'Rendering subtitles consumes extra processing power.',
+    category: 'streaming',
+    potentialSaving: 10,
+    icon: '📺'
+  },
+  {
+    id: 'streaming-6',
+    title: 'Log Out of Streaming Apps',
+    description: 'Logging out prevents background data sync for recommendations and ads.',
+    category: 'streaming',
+    potentialSaving: 12,
+    icon: '🚪'
+  },
+  {
+    id: 'streaming-7',
+    title: 'Use Energy-Efficient Devices',
+    description: 'Streaming on newer, efficient devices saves more energy than on old hardware.',
+    category: 'streaming',
+    potentialSaving: 50,
+    icon: '⚡'
+  },
+  {
+    id: 'streaming-8',
+    title: 'Disable Autoplay on Streaming Platforms',
+    description: 'Prevents unnecessary data use and energy by stopping continuous playback.',
+    category: 'streaming',
+    potentialSaving: 15,
+    icon: '⏹️'
   },
 
   // Coding Tips
@@ -102,6 +166,38 @@ export const TIPS_DATABASE: Tip[] = [
     potentialSaving: 90,
     icon: '💻',
   },
+  {
+    id: 'coding-5',
+    title: 'Turn Off Linting on Save (if not needed)',
+    description: 'Reduce CPU cycles by running linters manually instead of on every save.',
+    category: 'coding',
+    potentialSaving: 20,
+    icon: '🛑'
+  },
+  {
+    id: 'coding-6',
+    title: 'Close Extra Editor Tabs',
+    description: 'Keep open only the files you are actively working on to lower memory use.',
+    category: 'coding',
+    potentialSaving: 10,
+    icon: '📑'
+  },
+  {
+    id: 'coding-7',
+    title: 'Disable Unused Extensions',
+    description: 'Remove or disable unnecessary IDE extensions to reduce background processing.',
+    category: 'coding',
+    potentialSaving: 15,
+    icon: '🧩'
+  },
+  {
+    id: 'coding-8',
+    title: 'Prefer Local Builds Over Remote CI for Drafts',
+    description: 'Build locally during development to avoid triggering energy-intensive remote CI pipelines.',
+    category: 'coding',
+    potentialSaving: 35,
+    icon: '💻'
+  },
 
   // Video Calls Tips
   {
@@ -135,6 +231,38 @@ export const TIPS_DATABASE: Tip[] = [
     category: 'video_calls',
     potentialSaving: 100,
     icon: '📹',
+  },
+  {
+    id: 'video-5',
+    title: 'Reduce Call Frequency',
+    description: 'Opt for chat or email when video is unnecessary.',
+    category: 'video_calls',
+    potentialSaving: 150,
+    icon: '📹'
+  },
+  {
+    id: 'video-6',
+    title: 'Mute Microphone When Not Speaking',
+    description: 'Reduces unnecessary data transmission during calls.',
+    category: 'video_calls',
+    potentialSaving: 20,
+    icon: '🔇'
+  },
+  {
+    id: 'video-7',
+    title: 'Encourage Shorter Meetings',
+    description: 'Set an agenda to keep video meetings concise and focused.',
+    category: 'video_calls',
+    potentialSaving: 110,
+    icon: '⏳'
+  },
+  {
+    id: 'video-8',
+    title: 'Switch Off HD Video',
+    description: 'Use standard definition for video calls when high quality isn’t required.',
+    category: 'video_calls',
+    potentialSaving: 180,
+    icon: '📵'
   },
 
   // Cloud Storage Tips
@@ -170,6 +298,38 @@ export const TIPS_DATABASE: Tip[] = [
     potentialSaving: 15,
     icon: '☁️',
   },
+  {
+    id: 'cloud-5',
+    title: 'Remove Orphaned Shared Links',
+    description: 'Delete public links to files that are no longer needed to reduce access requests.',
+    category: 'cloud_storage',
+    potentialSaving: 8,
+    icon: '🔗'
+  },
+  {
+    id: 'cloud-6',
+    title: 'Sync Only Selected Folders',
+    description: 'Limit sync to essential folders instead of syncing everything.',
+    category: 'cloud_storage',
+    potentialSaving: 25,
+    icon: '📂'
+  },
+  {
+    id: 'cloud-7',
+    title: 'Review Shared Folders Regularly',
+    description: 'Clean up shared folders to avoid unnecessary storage and data transfers.',
+    category: 'cloud_storage',
+    potentialSaving: 18,
+    icon: '☁️'
+  },
+  {
+    id: 'cloud-8',
+    title: 'Use Storage with Renewable Energy',
+    description: 'Choose cloud providers that run on renewable energy sources.',
+    category: 'cloud_storage',
+    potentialSaving: 55,
+    icon: '🌱'
+  },
 
   // Gaming Tips
   {
@@ -204,6 +364,22 @@ export const TIPS_DATABASE: Tip[] = [
     potentialSaving: 60,
     icon: '🎮',
   },
+    {
+    id: 'gaming-5',
+    title: 'Limit Background Downloads',
+    description: 'Pause automatic game updates and downloads when not needed.',
+    category: 'gaming',
+    potentialSaving: 60,
+    icon: '🎮'
+  },
+  {
+    id: 'gaming-6',
+    title: 'Use Wired Connection for Online Play',
+    description: 'Ethernet connections can be more energy-efficient than WiFi for gaming.',
+    category: 'gaming',
+    potentialSaving: 25,
+    icon: '🎮'
+  },
 
   // Social Media Tips
   {
@@ -237,7 +413,7 @@ export const TIPS_DATABASE: Tip[] = [
     category: 'social_media',
     potentialSaving: 30,
     icon: '📱',
-  },
+  }
 ];
 
 export const getCategoryTips = (category: ActivityType): Tip[] => {

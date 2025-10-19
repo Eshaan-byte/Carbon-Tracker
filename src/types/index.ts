@@ -1,3 +1,5 @@
+import { BadgeRequirement } from "@/constants/badges";
+
 export interface Activity {
   id: string;
   type: ActivityType;
@@ -7,14 +9,14 @@ export interface Activity {
   emoji?: string;
 }
 
-export type ActivityType = 
-  | 'emails'
-  | 'streaming'
-  | 'coding'
-  | 'video_calls'
-  | 'cloud_storage'
-  | 'gaming'
-  | 'social_media';
+export type ActivityType =
+  | "emails"
+  | "streaming"
+  | "coding"
+  | "video_calls"
+  | "cloud_storage"
+  | "gaming"
+  | "social_media";
 
 export interface ActivityInput {
   emails: number;
@@ -43,7 +45,7 @@ export interface User {
 }
 
 export interface UserPreferences {
-  units: 'metric' | 'imperial';
+  units: "metric" | "imperial";
   notifications: boolean;
   weeklyGoal?: number;
 }
@@ -62,7 +64,7 @@ export interface Badge {
   name: string;
   description: string;
   icon: string;
-  requirement: string;
+  requirement: BadgeRequirement;
   achieved: boolean;
   achievedAt?: Date;
 }

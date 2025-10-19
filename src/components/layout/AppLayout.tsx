@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuthDev";
 import Navigation from "./Navigation";
@@ -13,26 +14,63 @@ import { calculateCarbonFootprint } from "@/lib/calculations/carbonFootprint";
 import { saveCarbonFootprint, saveActivity } from "@/lib/firebase/firestore";
 import { ShortcutsModal } from "../ui/ShortcutsModal";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import QuickActionsFAB from "@/components/ui/QuickActionsFAB";
 
 type PageType = "dashboard" | "activities" | "tips" | "goals" | "badges";
+type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact"; 
+
+const LOCAL_STORAGE_KEY = "activitySortPreference";
 
 export default function AppLayout() {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState<PageType>("dashboard");
   const [todayFootprint, setTodayFootprint] = useState(0);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [activityHistory, setActivityHistory] = useState<any[]>([]);
   const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
+  const [sortPreference, setSortPreference] = useState<SortOption>("newest");
 
   //keyboard hook
-  useKeyboardShortcuts({setCurrentPage});
+  useKeyboardShortcuts({ setCurrentPage });
 
   useEffect(() => {
+    const savedSort = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedSort && ['newest', 'oldest', 'highest_impact', 'lowest_impact'].includes(savedSort)) {
+      setSortPreference(savedSort as SortOption);
+    }
     // Load today's footprint when component mounts
     loadTodayFootprint();
   }, [user]);
+
+  const handleSortChange = (newSort: SortOption) => {
+    setSortPreference(newSort);
+    localStorage.setItem(LOCAL_STORAGE_KEY, newSort);
+  };
+
+  const getSortedActivityHistory = () => {
+    // We create a shallow copy to ensure we don't mutate the original state
+    const sortedList = [...activityHistory];
+
+    switch (sortPreference) {
+      case "newest":
+        // Sort descending by timestamp
+        return sortedList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      case "oldest":
+        // Sort ascending by timestamp
+        return sortedList.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+      case "highest_impact":
+        // Impact is based on totalCO2, so sort descending
+        return sortedList.sort((a, b) => b.result.totalCO2 - a.result.totalCO2);
+      case "lowest_impact":
+        // Impact is based on totalCO2, so sort ascending
+        return sortedList.sort((a, b) => a.result.totalCO2 - b.result.totalCO2);
+      default:
+        return sortedList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()); // Default to newest
+    }
+  };
 
   const loadTodayFootprint = async () => {
     // This would fetch today's footprint from the database
@@ -86,7 +124,8 @@ export default function AppLayout() {
       totalCO2: number;
       breakdown: Record<string, number>;
       equivalents: Array<{ description: string; value: number; unit: string }>;
-    }
+    },
+    customToastMessage?: string
   ) => {
     if (!user) return;
 
@@ -143,8 +182,8 @@ export default function AppLayout() {
           activities,
           result,
         });
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+        setSuccessToast(customToastMessage || "Activities saved successfully!");
+        setTimeout(() => setSuccessToast(null), 3000);
         return;
       }
 
@@ -177,8 +216,8 @@ export default function AppLayout() {
 
       // Execute all saves in parallel
       await Promise.all(savePromises);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      setSuccessToast(customToastMessage || "Activities saved successfully!");
+      setTimeout(() => setSuccessToast(null), 3000);
     } catch (error) {
       console.error("Error saving activities:", error);
       // Rollback UI changes on error
@@ -210,7 +249,9 @@ export default function AppLayout() {
         return (
           <Dashboard
             dashboardData={dashboardData}
-            activityHistory={activityHistory}
+            activityHistory={getSortedActivityHistory()}
+            sortPreference={sortPreference}
+            onSortChange={handleSortChange}
             onNavigate={setCurrentPage}
           />
         );
@@ -270,7 +311,10 @@ export default function AppLayout() {
                     name: "First Steps",
                     description: "Completed your first day of tracking",
                     icon: "👶",
-                    requirement: "milestone: 1",
+                    requirement: {
+                      type: "milestone",
+                      threshold: 1,
+                    },
                     achieved: true,
                     achievedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
                   },
@@ -279,7 +323,11 @@ export default function AppLayout() {
                     name: "Eco Warrior",
                     description: "Reduced weekly footprint by 25%",
                     icon: "🌿",
-                    requirement: "total_reduction: 25",
+                    requirement: {
+                      type: "total_reduction",
+                      threshold: 25,
+                      period: "weekly",
+                    },
                     achieved: true,
                     achievedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
                   },
@@ -291,7 +339,11 @@ export default function AppLayout() {
         );
 
       default:
-        return <Dashboard />;
+        return (<Dashboard
+          dashboardData={dashboardData}
+          activityHistory={activityHistory}
+          onNavigate={setCurrentPage}
+        />);
     }
   };
 
@@ -300,6 +352,8 @@ export default function AppLayout() {
   }
 
   return (
+    
+
     <div className="min-h-screen bg-gray-50">
       <Navigation
         currentPage={currentPage}
@@ -326,11 +380,11 @@ export default function AppLayout() {
       )}
 
       {/* Success Toast */}
-      {showSuccess && (
+      {successToast && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse">
           <div className="flex items-center space-x-2">
             <span className="text-lg">✅</span>
-            <span className="font-medium">Activities saved successfully!</span>
+            <span className="font-medium">{successToast}</span>
           </div>
         </div>
       )}
@@ -338,13 +392,15 @@ export default function AppLayout() {
       {/* Mobile spacing for bottom navigation */}
       <div className="h-16 lg:hidden"></div>
 
+      <QuickActionsFAB onSubmit={handleActivitySubmit} />
+
       <ShortcutsModal
         isOpen={showShortcutsModal}
         onClose={() => setShowShortcutsModal(false)}
       />
       <button
         onClick={() => setShowShortcutsModal(true)}
-        className="fixed bottom-4 right-4 bg-[#489d63] text-white p-3 rounded-full shadow-lg hover:bg-[#e3fdee] transition cursor-pointer"
+        className="fixed bottom-4 right-4 bg-[#489d63] text-white p-3 rounded-full shadow-lg hover:bg-[#e3fdee] transition cursor-pointer z-30"
         aria-label="Keyboard shortcuts"
       >
         ⌨️

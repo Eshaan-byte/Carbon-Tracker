@@ -1,8 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Badge } from '@/types';
-import { BADGE_TEMPLATES, RARITY_COLORS, RARITY_LABELS, getBadgeTemplate } from '@/constants/badges';
+import { useState } from "react";
+import { Badge } from "@/types";
+import {
+  BADGE_TEMPLATES,
+  RARITY_COLORS,
+  RARITY_LABELS,
+  getBadgeTemplate,
+} from "@/constants/badges";
+import Tooltip from "../ui/TooltTip";
+import clsx from "clsx";
+import ShareButton from "@/components/ui/ShareButton";
 
 interface BadgeDisplayProps {
   userBadges: Badge[];
@@ -18,112 +26,162 @@ interface BadgeCardProps {
 
 function BadgeCard({ badge, isEarned, onClick }: BadgeCardProps) {
   const template = getBadgeTemplate(badge.id);
-  const rarity = template?.rarity || 'common';
+  const rarity = template?.rarity || "common";
   const points = template?.points || 0;
 
   return (
-    <div
-      onClick={onClick}
-      className={`relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
-        isEarned
-          ? `${RARITY_COLORS[rarity]} border-current shadow-lg`
-          : 'bg-gray-50 border-gray-200 opacity-50'
-      }`}
+    <Tooltip
+      className={clsx(
+        "max-w-[200px]! scale-90! md:scale-100!",
+        badge.achievedAt ? "hidden!" : ""
+      )}
+      mobileIconClassName={clsx("ml-2 mt-2", badge.achievedAt ? "hidden!" : "")}
+      mobileIconPlacement="top-left"
+      mobileShowInfoIcon={true}
+      content={
+        <div className="flex flex-col gap-2 ">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            fill="transparent"
+            className="w-6 h-6 text-yellow-500 bg-transparent"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+            />
+          </svg>
+
+          <span className="text-white ">
+            This badge is earned by achieving a total CO₂ reduction of at least{" "}
+            {"  "}
+            {badge.requirement.threshold}% over a {badge.requirement.period}{" "}
+            period.
+          </span>
+        </div>
+      }
+      placement="center"
+      key={badge.id}
     >
-      {/* Badge Icon */}
-      <div className="text-center mb-3">
-        <div className={`text-4xl mb-2 ${isEarned ? '' : 'grayscale'}`}>
-          {badge.icon}
-        </div>
-        <div className={`text-xs font-medium px-2 py-1 rounded-full ${
-          isEarned ? RARITY_COLORS[rarity] : 'bg-gray-200 text-gray-500'
-        }`}>
-          {RARITY_LABELS[rarity]}
-        </div>
-      </div>
-
-      {/* Badge Info */}
-      <div className="text-center">
-        <h3 className={`font-bold text-sm mb-1 ${
-          isEarned ? 'text-gray-900' : 'text-gray-400'
-        }`}>
-          {badge.name}
-        </h3>
-        <p className={`text-xs leading-tight mb-2 ${
-          isEarned ? 'text-gray-600' : 'text-gray-400'
-        }`}>
-          {badge.description}
-        </p>
-        
-        {isEarned && (
-          <div className="flex items-center justify-center space-x-2 text-xs">
-            <span className="text-yellow-600">⭐ {points} pts</span>
-            {badge.achievedAt && (
-              <span className="text-gray-500">
-                {badge.achievedAt.toLocaleDateString()}
-              </span>
-            )}
+      <div
+        onClick={onClick}
+        className={`relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
+          isEarned
+            ? `${RARITY_COLORS[rarity]} border-current shadow-lg`
+            : "bg-gray-50 border-gray-200 opacity-50"
+        }`}
+      >
+        {/* Badge Icon */}
+        <div className="text-center mb-3">
+          <div className={`text-4xl mb-2 ${isEarned ? "" : "grayscale"}`}>
+            {badge.icon}
           </div>
+          <div
+            className={`text-xs font-medium px-2 py-1 rounded-full ${
+              isEarned ? RARITY_COLORS[rarity] : "bg-gray-200 text-gray-500"
+            }`}
+          >
+            {RARITY_LABELS[rarity]}
+          </div>
+        </div>
+
+        {/* Badge Info */}
+        <div className="text-center">
+          <h3
+            className={`font-bold text-sm mb-1 ${
+              isEarned ? "text-gray-900" : "text-gray-400"
+            }`}
+          >
+            {badge.name}
+          </h3>
+          <p
+            className={`text-xs leading-tight mb-2 ${
+              isEarned ? "text-gray-600" : "text-gray-400"
+            }`}
+          >
+            {badge.description}
+          </p>
+
+          {isEarned && (
+            <div className="flex items-center justify-center space-x-2 text-xs">
+              <span className="text-yellow-600">⭐ {points} pts</span>
+              {badge.achievedAt && (
+                <span className="text-gray-500">
+                  {badge.achievedAt.toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Lock icon for unearned badges */}
+        {!isEarned && (
+          <div className="absolute top-2 right-2 text-gray-400">🔒</div>
         )}
+
+        {/* New badge indicator */}
+        {isEarned &&
+          badge.achievedAt &&
+          new Date().getTime() - badge.achievedAt.getTime() <
+            7 * 24 * 60 * 60 * 1000 && (
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              NEW!
+            </div>
+          )}
       </div>
-
-      {/* Lock icon for unearned badges */}
-      {!isEarned && (
-        <div className="absolute top-2 right-2 text-gray-400">
-          🔒
-        </div>
-      )}
-
-      {/* New badge indicator */}
-      {isEarned && badge.achievedAt && 
-       new Date().getTime() - badge.achievedAt.getTime() < 7 * 24 * 60 * 60 * 1000 && (
-        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-          NEW!
-        </div>
-      )}
-    </div>
+    </Tooltip>
   );
 }
 
-export default function BadgeDisplay({ userBadges, showAll = false, className = '' }: BadgeDisplayProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+export default function BadgeDisplay({
+  userBadges,
+  showAll = false,
+  className = "",
+}: BadgeDisplayProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
 
   // Create a map of earned badges
-  const earnedBadgesMap = new Map(userBadges.map(badge => [badge.id, badge]));
+  const earnedBadgesMap = new Map(userBadges.map((badge) => [badge.id, badge]));
 
   // Get all badges to display
-  const allBadges = BADGE_TEMPLATES.map(template => {
+  const allBadges = BADGE_TEMPLATES.map((template) => {
     const earnedBadge = earnedBadgesMap.get(template.id);
-    return earnedBadge || {
-      id: template.id,
-      name: template.name,
-      description: template.description,
-      icon: template.icon,
-      requirement: template.requirement.type,
-      achieved: false,
-    };
+    return (
+      earnedBadge || {
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        icon: template.icon,
+        requirement: template.requirement,
+        achieved: false,
+      }
+    );
   });
 
   // Filter badges by category
-  const filteredBadges = selectedCategory === 'all' 
-    ? allBadges 
-    : allBadges.filter(badge => {
-        const template = getBadgeTemplate(badge.id);
-        return template?.category === selectedCategory;
-      });
+  const filteredBadges =
+    selectedCategory === "all"
+      ? allBadges
+      : allBadges.filter((badge) => {
+          const template = getBadgeTemplate(badge.id);
+          return template?.category === selectedCategory;
+        });
 
   // Show only earned badges if not showing all
-  const displayBadges = showAll 
-    ? filteredBadges 
-    : filteredBadges.filter(badge => badge.achieved);
+  const displayBadges = showAll
+    ? filteredBadges
+    : filteredBadges.filter((badge) => badge.achieved);
 
   const categories = [
-    { value: 'all', label: 'All', icon: '🏆' },
-    { value: 'environmental', label: 'Environmental', icon: '🌿' },
-    { value: 'consistency', label: 'Consistency', icon: '📅' },
-    { value: 'social', label: 'Social', icon: '👥' },
-    { value: 'milestone', label: 'Milestones', icon: '🎯' },
+    { value: "all", label: "All", icon: "🏆" },
+    { value: "environmental", label: "Environmental", icon: "🌿" },
+    { value: "consistency", label: "Consistency", icon: "📅" },
+    { value: "social", label: "Social", icon: "👥" },
+    { value: "milestone", label: "Milestones", icon: "🎯" },
   ];
 
   const earnedCount = userBadges.length;
@@ -142,7 +200,7 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
             {earnedCount} badges earned • {totalPoints} points
           </p>
         </div>
-        
+
         <div className="text-right">
           <div className="text-2xl font-bold text-green-600">{earnedCount}</div>
           <div className="text-sm text-gray-500">badges</div>
@@ -151,14 +209,14 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
 
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {categories.map(category => (
+        {categories.map((category) => (
           <button
             key={category.value}
             onClick={() => setSelectedCategory(category.value)}
             className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedCategory === category.value
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-green-50'
+                ? "bg-green-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-green-50"
             }`}
           >
             <span>{category.icon}</span>
@@ -184,8 +242,8 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
 
       {/* Badges Grid */}
       {displayBadges.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {displayBadges.map(badge => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 h-max">
+          {displayBadges.map((badge) => (
             <BadgeCard
               key={badge.id}
               badge={badge}
@@ -198,7 +256,9 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {selectedCategory === 'all' ? 'No badges yet' : 'No badges in this category'}
+            {selectedCategory === "all"
+              ? "No badges yet"
+              : "No badges in this category"}
           </h3>
           <p className="text-gray-600">
             Keep tracking your activities to earn your first badge!
@@ -212,15 +272,30 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
           <div className="bg-white rounded-xl p-6 max-w-md w-full">
             <div className="text-center mb-4">
               <div className="text-6xl mb-2">{selectedBadge.icon}</div>
-              <h3 className="text-xl font-bold text-gray-900">{selectedBadge.name}</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                {selectedBadge.name}
+              </h3>
               <p className="text-gray-600 mt-2">{selectedBadge.description}</p>
             </div>
-            
+
             {selectedBadge.achieved ? (
-              <div className="text-center">
-                <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full">
-                  <span>✅</span>
-                  <span>Achieved on {selectedBadge.achievedAt?.toLocaleDateString()}</span>
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full">
+                    <span>✅</span>
+                    <span>
+                      Achieved on{" "}
+                      {selectedBadge.achievedAt?.toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Share Button for achieved badges */}
+                <div className="flex justify-center">
+                  <ShareButton
+                    co2Amount={0}
+                    customMessage={`I just earned the "${selectedBadge.name}" badge on Carbon Tracker! 🏆 #CarbonFootprint`}
+                  />
                 </div>
               </div>
             ) : (
@@ -231,7 +306,7 @@ export default function BadgeDisplay({ userBadges, showAll = false, className = 
                 </div>
               </div>
             )}
-            
+
             <button
               onClick={() => setSelectedBadge(null)}
               className="w-full mt-6 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
