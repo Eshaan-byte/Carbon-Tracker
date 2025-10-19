@@ -12,6 +12,7 @@ import {
   limit,
   getDocs,
   Timestamp,
+  onSnapshot,
 } from 'firebase/firestore';
 import { db } from './config';
 import { Activity, CarbonFootprint, User, WeeklyGoal, Badge } from '@/types';
@@ -159,4 +160,17 @@ export const awardBadge = async (userId: string, badge: Omit<Badge, 'id' | 'achi
     achieved: true,
     achievedAt: Timestamp.now(),
   });
+};
+
+// Real-time subscrition to count of user's carbon footprint submissions
+export const subscribeToUserSubmissionCount = (
+  userId: string,
+  onCount: (count: number) => void
+) => {
+  const footprintsRef = collection(db, 'carbon_footprints');
+  const q = query(footprintsRef, where('userId', '==', userId));
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    onCount(snapshot.size);
+  });
+  return unsubscribe; 
 };

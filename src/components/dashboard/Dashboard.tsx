@@ -10,7 +10,7 @@ import {
 import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
 import ShareButton from "@/components/ui/ShareButton";
-import { getUserFootprints } from "@/lib/firebase/firestore";
+import { getUserFootprints, subscribeToUserSubmissionCount } from "@/lib/firebase/firestore";
 
 type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact";
 
@@ -27,11 +27,12 @@ interface StatCardProps {
   change?: number;
   icon: string;
   color: string;
+  tooltip?: string;
 }
 
-function StatCard({ title, value, change, icon, color }: StatCardProps) {
+function StatCard({ title, value, change, icon, color, tooltip }: StatCardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition" title={tooltip}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-600 text-sm font-medium">{title}</p>
@@ -98,6 +99,7 @@ export default function Dashboard({
     null
   );
   const [loading, setLoading] = useState(true);
+  const [submissionCount, setSubmissionCount] = useState(0);
 
   useEffect(() => {
     // Use prop data if available, otherwise fetch from database
@@ -205,6 +207,13 @@ export default function Dashboard({
     }
   }, [propDashboardData]);
 
+  // Real-time subscription to submission count
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = subscribeToUserSubmissionCount(user.id, setSubmissionCount);
+    return () => unsubscribe();
+  }, [user, activityHistory.length]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -237,6 +246,11 @@ export default function Dashboard({
 
   const equivalentIcons = ["🚗", "📱", "☕", "💡"];
 
+  // Format join date for tooltip
+  const joinDateLabel = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString()
+    : '';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -258,7 +272,7 @@ export default function Dashboard({
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-4 gap-6">
           <StatCard
             title="Today's Footprint"
             value={formatCO2Amount(dashboardData.todayFootprint)}
@@ -276,6 +290,13 @@ export default function Dashboard({
             value={formatCO2Amount(dashboardData.monthlyFootprint)}
             icon="📈"
             color="text-purple-600"
+          />
+          <StatCard
+            title="Activities Tracked"
+            value={`${submissionCount.toLocaleString()} tracked`}
+            icon="📈"
+            color="text-indigo-600"
+            tooltip={`since ${joinDateLabel}`}
           />
         </div>
 
