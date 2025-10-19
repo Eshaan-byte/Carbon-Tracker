@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityInput } from '@/types';
 import { calculateCarbonFootprint } from '@/lib/calculations/carbonFootprint';
 import { ACTIVITY_LABELS, ACTIVITY_DESCRIPTIONS } from '@/constants/co2Factors';
+import { ActivityIcon, getActivityIconConfig } from '@/utils/activityIcons';
 
 interface ActivityFormProps {
   onSubmit: (
@@ -13,7 +14,7 @@ interface ActivityFormProps {
       breakdown: Record<string, number>;
       equivalents: Array<{ description: string; value: number; unit: string }>;
     },
-    customToastMessage?: string // <-- Add this optional property
+    customToastMessage?: string
   ) => void;
   initialValues?: Partial<ActivityInput>;
 }
@@ -131,59 +132,59 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
   const formFields = [
     {
       key: 'emails' as keyof ActivityInput,
+      activityType: 'emails' as const,
       label: ACTIVITY_LABELS.emails,
       description: ACTIVITY_DESCRIPTIONS.emails,
       max: 500,
       step: 1,
-      icon: '📧',
     },
     {
       key: 'streamingHours' as keyof ActivityInput,
+      activityType: 'streaming' as const,
       label: ACTIVITY_LABELS.streaming,
       description: ACTIVITY_DESCRIPTIONS.streaming,
       max: 24,
       step: 0.5,
-      icon: '📺',
     },
     {
       key: 'codingHours' as keyof ActivityInput,
+      activityType: 'coding' as const,
       label: ACTIVITY_LABELS.coding,
       description: ACTIVITY_DESCRIPTIONS.coding,
       max: 24,
       step: 0.5,
-      icon: '💻',
     },
     {
       key: 'videoCallHours' as keyof ActivityInput,
+      activityType: 'video_calls' as const,
       label: ACTIVITY_LABELS.video_calls,
       description: ACTIVITY_DESCRIPTIONS.video_calls,
       max: 24,
       step: 0.5,
-      icon: '📹',
     },
     {
       key: 'cloudStorageGB' as keyof ActivityInput,
+      activityType: 'cloud_storage' as const,
       label: ACTIVITY_LABELS.cloud_storage,
       description: ACTIVITY_DESCRIPTIONS.cloud_storage,
       max: 1000,
       step: 1,
-      icon: '☁️',
     },
     {
       key: 'gamingHours' as keyof ActivityInput,
+      activityType: 'gaming' as const,
       label: ACTIVITY_LABELS.gaming,
       description: ACTIVITY_DESCRIPTIONS.gaming,
       max: 24,
       step: 0.5,
-      icon: '🎮',
     },
     {
       key: 'socialMediaHours' as keyof ActivityInput,
+      activityType: 'social_media' as const,
       label: ACTIVITY_LABELS.social_media,
       description: ACTIVITY_DESCRIPTIONS.social_media,
       max: 24,
       step: 0.5,
-      icon: '📱',
     },
   ];
 
@@ -197,98 +198,137 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
           <p className="text-gray-600">
             Enter your digital activities for today to calculate your carbon footprint
           </p>
+          <div className="flex justify-center items-center gap-4 mt-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span className="text-gray-600">Low Impact</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <span className="text-gray-600">Medium Impact</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span className="text-gray-600">High Impact</span>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
-            {formFields.map((field) => (
-              <div key={field.key} className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">{field.icon}</span>
-                  <label className="text-lg font-medium text-gray-900">
-                    {field.label}
-                  </label>
-                </div>
-                
-                <p className="text-sm text-gray-600 ml-10">
-                  {field.description}
-                </p>
-
-                <div className="ml-10">
-                  <div className="flex items-center space-x-4">
-                    <input
-                      type="range"
-                      min="0"
-                      max={field.max}
-                      step={field.step}
-                      value={activities[field.key]}
-                      onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value))}
-                      onBlur={() => handleBlur(field.key)}
-                      className={`flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
-                        errors[field.key] ? 'border border-red-500' : ''
-                      }`}
-                      aria-invalid={!!errors[field.key]}
-                      aria-describedby={`${field.key}-error ${field.key}-hint`}
+            {formFields.map((field) => {
+              const iconConfig = getActivityIconConfig(field.activityType);
+              
+              return (
+                <div 
+                  key={field.key} 
+                  className={`
+                    space-y-3 p-4 rounded-lg border-2 transition-all
+                    ${errors[field.key] ? 'border-red-500' : iconConfig.borderColor}
+                    hover:shadow-md
+                  `}
+                >
+                  <div className="flex items-center space-x-3">
+                    <ActivityIcon 
+                      activity={field.activityType} 
+                      size={28}
+                      showBackground={true}
                     />
-                    <div className="flex items-center space-x-2">
+                    <div className="flex-1">
+                      <label className="text-lg font-medium text-gray-900">
+                        {field.label}
+                      </label>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {iconConfig.impactLevel.charAt(0).toUpperCase() + 
+                         iconConfig.impactLevel.slice(1)} carbon impact
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600">
+                    {field.description}
+                  </p>
+
+                  <div>
+                    <div className="flex items-center space-x-4">
                       <input
-                        type="number"
+                        type="range"
                         min="0"
                         max={field.max}
                         step={field.step}
                         value={activities[field.key]}
-                        onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value) || 0)}
+                        onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value))}
                         onBlur={() => handleBlur(field.key)}
-                        className={`w-20 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-gray-900 ${
-                          errors[field.key] 
-                            ? 'border-red-500 focus:ring-red-500' 
-                            : 'border-gray-300 focus:ring-green-500'
+                        className={`flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
+                          errors[field.key] ? 'border border-red-500' : ''
                         }`}
+                        style={{
+                          background: `linear-gradient(to right, 
+                            ${iconConfig.impactLevel === 'low' ? '#10b981' : 
+                              iconConfig.impactLevel === 'medium' ? '#f59e0b' : '#ef4444'} 
+                            ${(activities[field.key] / field.max) * 100}%, 
+                            #e5e7eb ${(activities[field.key] / field.max) * 100}%)`
+                        }}
                         aria-invalid={!!errors[field.key]}
                         aria-describedby={`${field.key}-error ${field.key}-hint`}
                       />
-                      <span className="text-sm text-gray-500 min-w-fit">
-                        {field.key.includes('Hours') ? 'hrs' : 
-                         field.key.includes('GB') ? 'GB' : 
-                         field.key === 'emails' ? 'emails' : 'units'}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="number"
+                          min="0"
+                          max={field.max}
+                          step={field.step}
+                          value={activities[field.key]}
+                          onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value) || 0)}
+                          onBlur={() => handleBlur(field.key)}
+                          className={`
+                            w-20 px-3 py-2 border-2 rounded-md 
+                            focus:outline-none focus:ring-2 transition-all text-gray-900
+                            ${errors[field.key] 
+                              ? 'border-red-500 focus:ring-red-500' 
+                              : `${iconConfig.borderColor} focus:ring-${iconConfig.color.replace('text-', '').replace('-600', '-500')}`
+                            }
+                          `}
+                          aria-invalid={!!errors[field.key]}
+                          aria-describedby={`${field.key}-error ${field.key}-hint`}
+                        />
+                        <span className="text-sm text-gray-500 min-w-fit">
+                          {field.key.includes('Hours') ? 'hrs' : 
+                           field.key.includes('GB') ? 'GB' : 
+                           field.key === 'emails' ? '' : 'units'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* Progress bar */}
-                  <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
-                    <div
-                      className="bg-green-500 h-1 rounded-full transition-all duration-300"
-                      style={{ width: `${(activities[field.key] / field.max) * 100}%` }}
-                    ></div>
-                  </div>
 
-                  {/* Hint */}
-                  <p id={`${field.key}-hint`} className="text-xs text-gray-500 mt-1">
-                    {field.key.includes('Hours') 
-                      ? `Enter duration in ${field.key.includes('streaming') || field.key.includes('gaming') ? 'hours' : 'hours'} (e.g., 2.5)` 
-                      : field.key === 'emails' 
-                      ? 'Enter number of emails sent today' 
-                      : field.key === 'cloudStorageGB' 
-                      ? 'Enter storage used in GB' 
-                      : 'Enter quantity'}
-                  </p>
-
-                  {/* Error message */}
-                  {errors[field.key] && (
-                    <p id={`${field.key}-error`} className="text-sm text-red-600 mt-1" role="alert">
-                      {errors[field.key]}
+                    {/* Hint */}
+                    <p id={`${field.key}-hint`} className="text-xs text-gray-500 mt-2">
+                      {field.key.includes('Hours') 
+                        ? `Enter duration in hours (e.g., 2.5)` 
+                        : field.key === 'emails' 
+                        ? 'Enter number of emails sent today' 
+                        : field.key === 'cloudStorageGB' 
+                        ? 'Enter storage used in GB' 
+                        : 'Enter quantity'}
                     </p>
-                  )}
+
+                    {/* Error message */}
+                    {errors[field.key] && (
+                      <p id={`${field.key}-error`} className="text-sm text-red-600 mt-1 flex items-center gap-1" role="alert">
+                        <span>⚠️</span>
+                        {errors[field.key]}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Form error message */}
           {errors.form && (
-            <div className="text-center">
-              <p className="text-sm text-red-600" role="alert">
+            <div className="text-center bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-600 flex items-center justify-center gap-2" role="alert">
+                <span>⚠️</span>
                 {errors.form}
               </p>
             </div>
@@ -298,7 +338,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
             <button
               type="submit"
               disabled={isSubmitting || Object.keys(errors).length > 0}
-              className="px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
+              className="px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 shadow-lg"
             >
               {isSubmitting ? (
                 <div className="flex items-center space-x-2">
@@ -319,22 +359,22 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       <style jsx>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
-          height: 20px;
-          width: 20px;
+          height: 18px;
+          width: 18px;
           border-radius: 50%;
-          background: #059669;
+          background: #ffffff;
           cursor: pointer;
-          border: 2px solid #ffffff;
+          border: 3px solid;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
         
         .slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
+          height: 18px;
+          width: 18px;
           border-radius: 50%;
-          background: #059669;
+          background: #ffffff;
           cursor: pointer;
-          border: 2px solid #ffffff;
+          border: 3px solid;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
       `}</style>
