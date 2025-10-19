@@ -11,6 +11,7 @@ import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
 import ShareButton from "@/components/ui/ShareButton";
 import { getUserFootprints } from "@/lib/firebase/firestore";
+import ImpactStats from '../impactStats';
 
 type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact";
 
@@ -321,7 +322,7 @@ export default function Dashboard({
             </div>
           </div>
         )}
-
+<ImpactStats />
         {/* Recent Activities / Activity History (UPDATED SECTION) */}
         {activityHistory.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-8">
