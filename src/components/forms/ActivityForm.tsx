@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ActivityInput } from '@/types';
-import { calculateCarbonFootprint } from '@/lib/calculations/carbonFootprint';
-import { ACTIVITY_LABELS, ACTIVITY_DESCRIPTIONS } from '@/constants/co2Factors';
+import { useState } from "react";
+import { ActivityInput } from "@/types";
+import { calculateCarbonFootprint } from "@/lib/calculations/carbonFootprint";
+import {
+  ACTIVITY_LABELS,
+  ACTIVITY_DESCRIPTIONS,
+  CO2_FACTORS,
+  FIELD_TO_CO2_KEY,
+} from "@/constants/co2Factors";
+import Tooltip from "../ui/TooltTip";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 interface ActivityFormProps {
   onSubmit: (
@@ -18,7 +25,10 @@ interface ActivityFormProps {
   initialValues?: Partial<ActivityInput>;
 }
 
-export default function ActivityForm({ onSubmit, initialValues }: ActivityFormProps) {
+export default function ActivityForm({
+  onSubmit,
+  initialValues,
+}: ActivityFormProps) {
   const [activities, setActivities] = useState<ActivityInput>({
     emails: initialValues?.emails || 0,
     streamingHours: initialValues?.streamingHours || 0,
@@ -35,20 +45,20 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
 
   const validateField = (field: keyof ActivityInput, value: number) => {
     if (value <= 0) {
-      if (field.includes('Hours')) {
-        return 'Duration must be greater than 0';
-      } else if (field === 'emails' || field === 'cloudStorageGB') {
-        return 'Quantity must be greater than 0';
+      if (field.includes("Hours")) {
+        return "Duration must be greater than 0";
+      } else if (field === "emails" || field === "cloudStorageGB") {
+        return "Quantity must be greater than 0";
       }
     }
-    return '';
+    return "";
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     let hasActivity = false;
 
-    formFields.forEach(field => {
+    formFields.forEach((field) => {
       const value = activities[field.key];
       if (value > 0) {
         hasActivity = true;
@@ -63,7 +73,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
     });
 
     if (!hasActivity) {
-      newErrors.form = 'Please select at least one activity';
+      newErrors.form = "Please select at least one activity";
     }
 
     setErrors(newErrors);
@@ -71,41 +81,44 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
   };
 
   const handleInputChange = (field: keyof ActivityInput, value: number) => {
-    setActivities(prev => ({ ...prev, [field]: Math.max(0, value) }));
+    setActivities((prev) => ({ ...prev, [field]: Math.max(0, value) }));
     // Clear error when user starts typing
+    if (errors.form) {
+      setErrors((prev) => ({ ...prev, form: "" }));
+    }
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   const handleBlur = (field: keyof ActivityInput) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
     const error = validateField(field, activities[field]);
-    setErrors(prev => ({ ...prev, [field]: error }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Mark all fields as touched
     const allTouched: Record<string, boolean> = {};
-    formFields.forEach(field => {
+    formFields.forEach((field) => {
       allTouched[field.key] = true;
     });
     setTouched(allTouched);
-    
+
     if (!validateForm()) {
       return; // Don't submit if invalid
     }
-    
+
     setIsSubmitting(true);
 
     try {
       const result = calculateCarbonFootprint(activities);
-      
+
       // Start submission immediately - don't wait for completion
       onSubmit(activities, result);
-      
+
       // Reset form after a short delay
       setTimeout(() => {
         setActivities({
@@ -121,69 +134,68 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
         setTouched({});
         setIsSubmitting(false);
       }, 500);
-      
     } catch (error) {
-      console.error('Error submitting activities:', error);
+      console.error("Error submitting activities:", error);
       setIsSubmitting(false);
     }
   };
 
   const formFields = [
     {
-      key: 'emails' as keyof ActivityInput,
+      key: "emails" as keyof ActivityInput,
       label: ACTIVITY_LABELS.emails,
       description: ACTIVITY_DESCRIPTIONS.emails,
       max: 500,
       step: 1,
-      icon: '📧',
+      icon: "📧",
     },
     {
-      key: 'streamingHours' as keyof ActivityInput,
+      key: "streamingHours" as keyof ActivityInput,
       label: ACTIVITY_LABELS.streaming,
       description: ACTIVITY_DESCRIPTIONS.streaming,
       max: 24,
       step: 0.5,
-      icon: '📺',
+      icon: "📺",
     },
     {
-      key: 'codingHours' as keyof ActivityInput,
+      key: "codingHours" as keyof ActivityInput,
       label: ACTIVITY_LABELS.coding,
       description: ACTIVITY_DESCRIPTIONS.coding,
       max: 24,
       step: 0.5,
-      icon: '💻',
+      icon: "💻",
     },
     {
-      key: 'videoCallHours' as keyof ActivityInput,
+      key: "videoCallHours" as keyof ActivityInput,
       label: ACTIVITY_LABELS.video_calls,
       description: ACTIVITY_DESCRIPTIONS.video_calls,
       max: 24,
       step: 0.5,
-      icon: '📹',
+      icon: "📹",
     },
     {
-      key: 'cloudStorageGB' as keyof ActivityInput,
+      key: "cloudStorageGB" as keyof ActivityInput,
       label: ACTIVITY_LABELS.cloud_storage,
       description: ACTIVITY_DESCRIPTIONS.cloud_storage,
       max: 1000,
       step: 1,
-      icon: '☁️',
+      icon: "☁️",
     },
     {
-      key: 'gamingHours' as keyof ActivityInput,
+      key: "gamingHours" as keyof ActivityInput,
       label: ACTIVITY_LABELS.gaming,
       description: ACTIVITY_DESCRIPTIONS.gaming,
       max: 24,
       step: 0.5,
-      icon: '🎮',
+      icon: "🎮",
     },
     {
-      key: 'socialMediaHours' as keyof ActivityInput,
+      key: "socialMediaHours" as keyof ActivityInput,
       label: ACTIVITY_LABELS.social_media,
       description: ACTIVITY_DESCRIPTIONS.social_media,
       max: 24,
       step: 0.5,
-      icon: '📱',
+      icon: "📱",
     },
   ];
 
@@ -195,7 +207,8 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
             Track Your Daily Digital Activities
           </h2>
           <p className="text-gray-600">
-            Enter your digital activities for today to calculate your carbon footprint
+            Enter your digital activities for today to calculate your carbon
+            footprint
           </p>
         </div>
 
@@ -208,8 +221,31 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                   <label className="text-lg font-medium text-gray-900">
                     {field.label}
                   </label>
+                  <Tooltip
+                    mobileShowInfoIcon={true}
+                    mobileIconPlacement="bottom-left"
+                    mobileIconClassName="mt-2!"
+                    content={
+                      <span className="text-white">{`${field.label} Produces ${
+                        CO2_FACTORS[FIELD_TO_CO2_KEY[field.key]]
+                      } Grams of CO2/${
+                        field.key.includes("Hours")
+                          ? "Hr"
+                          : field.key.includes("GB")
+                          ? "GB"
+                          : field.key === "emails"
+                          ? "Email"
+                          : "Unit"
+                      }`}</span>
+                    }
+                  >
+                    <InformationCircleIcon
+                      className="opacity-0! lg:opacity-100!  text-slate-800 cursor-pointer"
+                      width={18}
+                    />
+                  </Tooltip>
                 </div>
-                
+
                 <p className="text-sm text-gray-600 ml-10">
                   {field.description}
                 </p>
@@ -222,10 +258,12 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                       max={field.max}
                       step={field.step}
                       value={activities[field.key]}
-                      onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        handleInputChange(field.key, parseFloat(e.target.value))
+                      }
                       onBlur={() => handleBlur(field.key)}
                       className={`flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
-                        errors[field.key] ? 'border border-red-500' : ''
+                        errors[field.key] ? "border border-red-500" : ""
                       }`}
                       aria-invalid={!!errors[field.key]}
                       aria-describedby={`${field.key}-error ${field.key}-hint`}
@@ -237,46 +275,69 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                         max={field.max}
                         step={field.step}
                         value={activities[field.key]}
-                        onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            field.key,
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
                         onBlur={() => handleBlur(field.key)}
                         className={`w-20 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-gray-900 ${
-                          errors[field.key] 
-                            ? 'border-red-500 focus:ring-red-500' 
-                            : 'border-gray-300 focus:ring-green-500'
+                          errors[field.key]
+                            ? "border-red-500 focus:ring-red-500"
+                            : "border-gray-300 focus:ring-green-500"
                         }`}
                         aria-invalid={!!errors[field.key]}
                         aria-describedby={`${field.key}-error ${field.key}-hint`}
                       />
                       <span className="text-sm text-gray-500 min-w-fit">
-                        {field.key.includes('Hours') ? 'hrs' : 
-                         field.key.includes('GB') ? 'GB' : 
-                         field.key === 'emails' ? 'emails' : 'units'}
+                        {field.key.includes("Hours")
+                          ? "hrs"
+                          : field.key.includes("GB")
+                          ? "GB"
+                          : field.key === "emails"
+                          ? "emails"
+                          : "units"}
                       </span>
                     </div>
                   </div>
-                  
+
                   {/* Progress bar */}
                   <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
                     <div
                       className="bg-green-500 h-1 rounded-full transition-all duration-300"
-                      style={{ width: `${(activities[field.key] / field.max) * 100}%` }}
+                      style={{
+                        width: `${(activities[field.key] / field.max) * 100}%`,
+                      }}
                     ></div>
                   </div>
 
                   {/* Hint */}
-                  <p id={`${field.key}-hint`} className="text-xs text-gray-500 mt-1">
-                    {field.key.includes('Hours') 
-                      ? `Enter duration in ${field.key.includes('streaming') || field.key.includes('gaming') ? 'hours' : 'hours'} (e.g., 2.5)` 
-                      : field.key === 'emails' 
-                      ? 'Enter number of emails sent today' 
-                      : field.key === 'cloudStorageGB' 
-                      ? 'Enter storage used in GB' 
-                      : 'Enter quantity'}
+                  <p
+                    id={`${field.key}-hint`}
+                    className="text-xs text-gray-500 mt-1"
+                  >
+                    {field.key.includes("Hours")
+                      ? `Enter duration in ${
+                          field.key.includes("streaming") ||
+                          field.key.includes("gaming")
+                            ? "hours"
+                            : "hours"
+                        } (e.g., 2.5)`
+                      : field.key === "emails"
+                      ? "Enter number of emails sent today"
+                      : field.key === "cloudStorageGB"
+                      ? "Enter storage used in GB"
+                      : "Enter quantity"}
                   </p>
 
                   {/* Error message */}
                   {errors[field.key] && (
-                    <p id={`${field.key}-error`} className="text-sm text-red-600 mt-1" role="alert">
+                    <p
+                      id={`${field.key}-error`}
+                      className="text-sm text-red-600 mt-1"
+                      role="alert"
+                    >
                       {errors[field.key]}
                     </p>
                   )}
@@ -297,7 +358,12 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              disabled={isSubmitting || Object.keys(errors).length > 0}
+              disabled={
+                isSubmitting ||
+                Object.values(errors).some(
+                  (error) => error && error.trim() !== ""
+                )
+              }
               className="px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
             >
               {isSubmitting ? (
@@ -327,7 +393,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
           border: 2px solid #ffffff;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
-        
+
         .slider::-moz-range-thumb {
           height: 20px;
           width: 20px;

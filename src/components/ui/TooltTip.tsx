@@ -56,7 +56,8 @@ export default function Tooltip({
   >(undefined);
   const [mounted, setMounted] = useState(false);
   const hideTimer = useRef<number | null>(null);
-  const rafId = useRef<number | null>(null);
+  const rafTooltipId = useRef<number | null>(null);
+  const rafIconId = useRef<number | null>(null);
 
   // Track screen width to apply mobile behavior (< sm = 640px)
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -116,9 +117,9 @@ export default function Tooltip({
     if (!visible) return;
     // Use rAF to avoid layout thrash when many scroll/resize events fire
     const schedule = () => {
-      if (rafId.current != null) return;
-      rafId.current = window.requestAnimationFrame(() => {
-        rafId.current = null;
+      if (rafTooltipId.current != null) return;
+      rafTooltipId.current = window.requestAnimationFrame(() => {
+        rafTooltipId.current = null;
         compute();
       });
     };
@@ -260,7 +261,6 @@ export default function Tooltip({
     // Observe tooltip and target size changes
     const ro = new ResizeObserver(() => schedule());
     if (targetRef.current) ro.observe(targetRef.current);
-    if (mobileIconRef.current) ro.observe(mobileIconRef.current);
     if (tooltipRef.current) ro.observe(tooltipRef.current);
 
     // Recompute on any scroll (capture true to catch nested scroll containers)
@@ -270,9 +270,9 @@ export default function Tooltip({
       ro.disconnect();
       window.removeEventListener("scroll", schedule, true);
       window.removeEventListener("resize", schedule);
-      if (rafId.current != null) {
-        window.cancelAnimationFrame(rafId.current);
-        rafId.current = null;
+      if (rafTooltipId.current != null) {
+        window.cancelAnimationFrame(rafTooltipId.current);
+        rafTooltipId.current = null;
       }
     };
   }, [visible, placement, offset, isSmallScreen, mobilePlacement]);
@@ -286,9 +286,9 @@ export default function Tooltip({
 
     const ICON_SIZE = 24; // px (w-6 h-6)
     const schedule = () => {
-      if (rafId.current != null) return;
-      rafId.current = window.requestAnimationFrame(() => {
-        rafId.current = null;
+      if (rafIconId.current != null) return;
+      rafIconId.current = window.requestAnimationFrame(() => {
+        rafIconId.current = null;
         computeIcon();
       });
     };
@@ -318,11 +318,6 @@ export default function Tooltip({
           left = r.right - ICON_SIZE - 4;
           break;
       }
-      // Keep inside viewport just in case
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      left = Math.min(Math.max(left, 4), vw - ICON_SIZE - 4);
-      top = Math.min(Math.max(top, 4), vh - ICON_SIZE - 4);
       setMobileIconStyle({
         position: "fixed",
         top: Math.round(top),
@@ -340,9 +335,9 @@ export default function Tooltip({
       ro.disconnect();
       window.removeEventListener("scroll", schedule, true);
       window.removeEventListener("resize", schedule);
-      if (rafId.current != null) {
-        window.cancelAnimationFrame(rafId.current);
-        rafId.current = null;
+      if (rafIconId.current != null) {
+        window.cancelAnimationFrame(rafIconId.current);
+        rafIconId.current = null;
       }
     };
   }, [isSmallScreen, mobileShowInfoIcon, mobileIconPlacement]);
