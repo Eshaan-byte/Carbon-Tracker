@@ -17,7 +17,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import QuickActionsFAB from "@/components/ui/QuickActionsFAB";
 
 type PageType = "dashboard" | "activities" | "tips" | "goals" | "badges";
-type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact"; 
+type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact";
 
 const LOCAL_STORAGE_KEY = "activitySortPreference";
 
@@ -244,6 +244,10 @@ export default function AppLayout() {
   };
 
   const renderCurrentPage = () => {
+    // Calculate totals from history to pass to the form
+    const totalActivitiesBefore = activityHistory.length;
+    const totalCO2Before = activityHistory.reduce((sum, entry) => sum + entry.result.totalCO2, 0);
+
     switch (currentPage) {
       case "dashboard":
         return (
@@ -263,6 +267,8 @@ export default function AppLayout() {
               <ActivityForm
                 onSubmit={handleActivitySubmit}
                 initialValues={{}}
+                totalActivitiesBefore={totalActivitiesBefore}
+                totalCO2Before={totalCO2Before}
               />
             </div>
           </div>
@@ -352,7 +358,7 @@ export default function AppLayout() {
   }
 
   return (
-    
+
 
     <div className="min-h-screen bg-gray-50">
       <Navigation
