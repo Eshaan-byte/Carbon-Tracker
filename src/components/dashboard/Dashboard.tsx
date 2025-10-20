@@ -10,6 +10,7 @@ import {
 import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
 import ShareButton from "@/components/ui/ShareButton";
+import EnvironmentalFacts from "@/components/ui/EnvironmentalFacts";
 import { getUserFootprints } from "@/lib/firebase/firestore";
 import { exportToCSV, ActivityHistoryEntry } from "@/utils/exportCSV";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
@@ -323,6 +324,9 @@ export default function Dashboard({
             title="7-Day Trend"
           />
         </div>
+
+        {/* Did You Know? Environmental Facts */}
+        <EnvironmentalFacts />
 
         {/* Equivalents Section */}
         {dashboardData.equivalents.length > 0 && (
