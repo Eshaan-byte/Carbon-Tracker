@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityInput } from '@/types';
 import { calculateCarbonFootprint } from '@/lib/calculations/carbonFootprint';
 import { ACTIVITY_LABELS, ACTIVITY_DESCRIPTIONS } from '@/constants/co2Factors';
+import { useCelebration } from '@/hooks/useCelebration';
 
 interface ActivityFormProps {
   onSubmit: (
@@ -13,12 +14,19 @@ interface ActivityFormProps {
       breakdown: Record<string, number>;
       equivalents: Array<{ description: string; value: number; unit: string }>;
     },
-    customToastMessage?: string // <-- Add this optional property
+    customToastMessage?: string
   ) => void;
   initialValues?: Partial<ActivityInput>;
+  totalActivitiesBefore: number; // Prop to track existing activity count
+  totalCO2Before: number; // Prop to track existing CO2 total in grams
 }
 
-export default function ActivityForm({ onSubmit, initialValues }: ActivityFormProps) {
+export default function ActivityForm({
+  onSubmit,
+  initialValues,
+  totalActivitiesBefore = 0,
+  totalCO2Before = 0,
+}: ActivityFormProps) {
   const [activities, setActivities] = useState<ActivityInput>({
     emails: initialValues?.emails || 0,
     streamingHours: initialValues?.streamingHours || 0,
@@ -32,14 +40,11 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const { showCelebration } = useCelebration();
 
   const validateField = (field: keyof ActivityInput, value: number) => {
-    if (value <= 0) {
-      if (field.includes('Hours')) {
-        return 'Duration must be greater than 0';
-      } else if (field === 'emails' || field === 'cloudStorageGB') {
-        return 'Quantity must be greater than 0';
-      }
+    if (value < 0) {
+      return 'Value cannot be negative';
     }
     return '';
   };
@@ -53,7 +58,6 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       if (value > 0) {
         hasActivity = true;
       }
-      // Check individual field errors if touched
       if (touched[field.key]) {
         const error = validateField(field.key, value);
         if (error) {
@@ -72,7 +76,6 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
 
   const handleInputChange = (field: keyof ActivityInput, value: number) => {
     setActivities(prev => ({ ...prev, [field]: Math.max(0, value) }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -84,29 +87,54 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
     setErrors(prev => ({ ...prev, [field]: error }));
   };
 
+  const checkAndTriggerMilestones = (newCO2: number) => {
+    const newActivityCount = totalActivitiesBefore + 1;
+    const newCO2TotalGrams = totalCO2Before + newCO2;
+
+    // Use a timeout to allow the submit UI to update first
+    setTimeout(() => {
+      let celebrationMessage = '';
+
+      // Check milestones from biggest to smallest to show the most important one
+      if (totalCO2Before < 1000 && newCO2TotalGrams >= 1000) {
+        celebrationMessage = "Incredible! You've tracked over 1kg of CO2!";
+      } else if (totalCO2Before < 100 && newCO2TotalGrams >= 100) {
+        celebrationMessage = 'Great start! You\'ve tracked your first 100g of CO2.';
+      } else if (totalActivitiesBefore < 10 && newActivityCount >= 10) {
+        celebrationMessage = '10 activities logged! You are building a great habit!';
+      } else if (totalActivitiesBefore === 0 && newActivityCount === 1) {
+        celebrationMessage = 'Congratulations on logging your first activity!';
+      }
+
+      if (celebrationMessage) {
+        showCelebration(celebrationMessage);
+      }
+    }, 600); // Delay slightly longer than form reset
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mark all fields as touched
+
     const allTouched: Record<string, boolean> = {};
     formFields.forEach(field => {
       allTouched[field.key] = true;
     });
     setTouched(allTouched);
-    
+
     if (!validateForm()) {
-      return; // Don't submit if invalid
+      return;
     }
-    
+
     setIsSubmitting(true);
 
     try {
       const result = calculateCarbonFootprint(activities);
-      
-      // Start submission immediately - don't wait for completion
+
+      // Check for milestones before submitting
+      checkAndTriggerMilestones(result.totalCO2);
+
       onSubmit(activities, result);
-      
-      // Reset form after a short delay
+
       setTimeout(() => {
         setActivities({
           emails: 0,
@@ -121,7 +149,6 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
         setTouched({});
         setIsSubmitting(false);
       }, 500);
-      
     } catch (error) {
       console.error('Error submitting activities:', error);
       setIsSubmitting(false);
@@ -249,13 +276,12 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                       />
                       <span className="text-sm text-gray-500 min-w-fit">
                         {field.key.includes('Hours') ? 'hrs' : 
-                         field.key.includes('GB') ? 'GB' : 
-                         field.key === 'emails' ? 'emails' : 'units'}
+                          field.key.includes('GB') ? 'GB' : 
+                          field.key === 'emails' ? 'emails' : 'units'}
                       </span>
                     </div>
                   </div>
                   
-                  {/* Progress bar */}
                   <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
                     <div
                       className="bg-green-500 h-1 rounded-full transition-all duration-300"
@@ -263,7 +289,6 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                     ></div>
                   </div>
 
-                  {/* Hint */}
                   <p id={`${field.key}-hint`} className="text-xs text-gray-500 mt-1">
                     {field.key.includes('Hours') 
                       ? `Enter duration in ${field.key.includes('streaming') || field.key.includes('gaming') ? 'hours' : 'hours'} (e.g., 2.5)` 
@@ -274,7 +299,6 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
                       : 'Enter quantity'}
                   </p>
 
-                  {/* Error message */}
                   {errors[field.key] && (
                     <p id={`${field.key}-error`} className="text-sm text-red-600 mt-1" role="alert">
                       {errors[field.key]}
@@ -285,7 +309,6 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
             ))}
           </div>
 
-          {/* Form error message */}
           {errors.form && (
             <div className="text-center">
               <p className="text-sm text-red-600" role="alert">
