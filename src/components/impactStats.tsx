@@ -5,27 +5,24 @@ import { IMPACT_STATS, INSPIRATIONAL_TAGLINE, ImpactStat } from '../constants/im
 import useCountUp from '../hooks/useCountUp'; 
 
 const StatCard: React.FC<{ stat: ImpactStat }> = ({ stat }) => {
-  const duration = stat.value > 1000 ? 2500 : 2000;
+  const duration = stat.value > 1000 ? 2500 : 3000;
   
   const animatedValue = useCountUp(stat.value, duration, 0); 
 
   let displayContent: string;
   let unit: string = '';
-  let isFinal: boolean = animatedValue >= stat.value * 0.99;
-
-  if (stat.id === 2) {
-    displayContent = animatedValue.toFixed(1);
+  
+  if (stat.decimalPlaces !== undefined) {
+    displayContent = animatedValue.toFixed(stat.decimalPlaces);
     unit = ' tons';
   } else {
     const roundedValue = Math.round(animatedValue);
     displayContent = roundedValue.toLocaleString();
-
-    if (stat.display.includes('+') && isFinal) {
-        displayContent += '+';
-    }
   }
 
-  const finalDisplay = `${displayContent}${unit}`;
+  const plusSign = stat.showPlus ? '+' : '';
+  
+  const finalDisplay = `${plusSign}${displayContent}${unit}`;
 
   return (
     <div 

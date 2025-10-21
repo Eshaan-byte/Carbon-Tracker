@@ -1,28 +1,32 @@
-export type ImpactStat = {
+export interface ImpactStat {
   id: number;
-  value: number; 
-  display: string;
   suffix: string; 
-};
-export const IMPACT_STATS = [
+  value: number; 
+  decimalPlaces?: number; 
+  showPlus?: boolean; 
+}
+
+export const INSPIRATIONAL_TAGLINE = "Every action counts. Join the collective impact.";
+
+export const IMPACT_STATS: ImpactStat[] = [
   {
     id: 1,
-    value: 10500, 
-    display: "10,000+",
-    suffix: "activities tracked",
+    suffix: 'activities tracked',
+    value: 10500,
+    showPlus: true, // Show '+' for users
   },
   {
     id: 2,
-    value: 2500, 
-    display: "2.5",
-    suffix: "tons CO2 awareness raised",
+    suffix: 'Tons of CO2 awareness raised',
+    value: 2.5,          
+    decimalPlaces: 1,    
+    showPlus: true,      
   },
   {
     id: 3,
-    value: 530, 
-    display: "500+",
-    suffix: "eco-warriors joined",
+    suffix: 'eco-warriors joined',
+    value: 530,
+    showPlus:true,
   },
 ];
 
-export const INSPIRATIONAL_TAGLINE = "Every action counts. Join the collective impact.";
