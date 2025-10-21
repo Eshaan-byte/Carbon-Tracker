@@ -16,6 +16,7 @@ export const calculateCarbonFootprint = (activities: ActivityInput): Calculation
     cloud_storage: activities.cloudStorageGB * CO2_FACTORS.cloud_storage,
     gaming: activities.gamingHours * CO2_FACTORS.gaming,
     social_media: activities.socialMediaHours * CO2_FACTORS.social_media,
+    music_streaming: activities.musicStreamingHours * CO2_FACTORS.music_streaming,
   };
 
   const totalCO2 = Object.values(breakdown).reduce((sum, value) => sum + value, 0);
@@ -123,6 +124,10 @@ export const suggestReductions = (breakdown: Record<ActivityType, number>): Arra
       case 'social_media':
         suggestion = 'Set time limits for social media browsing';
         potentialSaving = emissions * 0.3;
+        break;
+      case 'music_streaming':
+        suggestion = 'Download music for offline listening or reduce streaming quality';
+        potentialSaving = emissions * 0.25;
         break;
     }
     

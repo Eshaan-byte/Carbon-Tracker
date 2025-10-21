@@ -15,7 +15,8 @@ export type ActivityType =
   | "video_calls"
   | "cloud_storage"
   | "gaming"
-  | "social_media";
+  | "social_media"
+  | "music_streaming";
 
 export interface ActivityTypeInfo {
   id: ActivityType;
@@ -27,38 +28,43 @@ export const ACTIVITY_TYPES: Record<ActivityType, ActivityTypeInfo> = {
   emails: {
     id: "emails",
     label: "Email",
-    description: "Sending and receiving emails"
+    description: "Sending and receiving emails",
   },
   video_calls: {
     id: "video_calls",
     label: "Video Calls",
-    description: "Zoom, Teams, Google Meet calls"
+    description: "Zoom, Teams, Google Meet calls",
   },
   streaming: {
     id: "streaming",
     label: "Streaming",
-    description: "Netflix, YouTube, Spotify"
+    description: "Netflix, YouTube, Spotify",
   },
   coding: {
     id: "coding",
     label: "Coding",
-    description: "Using IDEs, compiling code"
+    description: "Using IDEs, compiling code",
   },
   cloud_storage: {
     id: "cloud_storage",
     label: "Cloud Storage",
-    description: "Google Drive, Dropbox, iCloud"
+    description: "Google Drive, Dropbox, iCloud",
   },
   gaming: {
     id: "gaming",
     label: "Gaming",
-    description: "Online gaming and downloads"
+    description: "Online gaming and downloads",
   },
   social_media: {
     id: "social_media",
     label: "Social Media",
-    description: "Facebook, Instagram, Twitter"
-  }
+    description: "Facebook, Instagram, Twitter",
+  },
+  music_streaming: {
+    id: "music_streaming",
+    label: "Music Streaming",
+    description: "Hours spent listening to Spotify, Apple Music, or YouTube Music",
+  },
 };
 
 export interface ActivityInput {
@@ -69,6 +75,7 @@ export interface ActivityInput {
   cloudStorageGB: number;
   gamingHours: number;
   socialMediaHours: number;
+  musicStreamingHours: number;
 }
 
 export interface CarbonFootprint {

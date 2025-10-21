@@ -18,6 +18,7 @@ export const defaultActivities: ActivityInput = {
   cloudStorageGB: 0,
   gamingHours: 0,
   socialMediaHours: 0,
+  musicStreamingHours:0,
 };
 
 // Define all your presets here, matching the GitHub issue
@@ -57,5 +58,12 @@ export const QUICK_ACTIONS: QuickAction[] = [
     toastMessage: "✅ Added 1 hour browsing (30g CO2)",
     // Note: Mapping 'Browsing' to 'socialMediaHours' as it's the closest available field
     activities: { socialMediaHours: 1 },
+  },
+  {
+    id: "music_1h",
+    icon: "🎵",
+    label: "1 Hr Music Streaming",
+    toastMessage: "✅ Added 1 hour music streaming (XXg CO2)",
+    activities: { musicStreamingHours: 1 },
   },
 ];

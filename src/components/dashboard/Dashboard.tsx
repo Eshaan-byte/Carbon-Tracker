@@ -157,6 +157,7 @@ export default function Dashboard({
           cloud_storage: 0,
           gaming: 0,
           social_media: 0,
+          music_streaming: 0,
         };
 
         footprints

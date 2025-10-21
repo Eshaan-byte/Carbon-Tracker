@@ -27,6 +27,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
     cloudStorageGB: initialValues?.cloudStorageGB || 0,
     gamingHours: initialValues?.gamingHours || 0,
     socialMediaHours: initialValues?.socialMediaHours || 0,
+    musicStreamingHours: initialValues?.musicStreamingHours || 0,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,6 +97,7 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
           cloudStorageGB: 0,
           gamingHours: 0,
           socialMediaHours: 0,
+          musicStreamingHours: 0,
         });
         setErrors({});
         setTouched({});
@@ -164,6 +166,14 @@ export default function ActivityForm({ onSubmit, initialValues }: ActivityFormPr
       max: 24,
       step: 0.5,
       icon: '📱',
+    },
+    {
+      key: 'musicStreamingHours' as keyof ActivityInput,
+      label: ACTIVITY_LABELS.music_streaming,
+      description: ACTIVITY_DESCRIPTIONS.music_streaming,
+      max: 24,
+      step: 0.5,
+      icon: '🎵',
     },
   ];
   const hasActivity = Object.values(activities).some((v) => v > 0);
