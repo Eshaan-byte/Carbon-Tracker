@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge } from "@/types";
 import {
   BADGE_TEMPLATES,
+  BadgeRequirement,
   RARITY_COLORS,
   RARITY_LABELS,
   getBadgeTemplate,
@@ -22,6 +23,27 @@ interface BadgeCardProps {
   badge: Badge;
   isEarned: boolean;
   onClick?: () => void;
+}
+
+function getBadgeRequirementDescription(requirement: BadgeRequirement): string {
+  switch (requirement.type) {
+    case "total_reduction":
+      return `Reduce your ${requirement.period} CO₂ footprint by ${requirement.threshold}%`;
+    case "streak_days":
+      return `Log activities for ${requirement.threshold} consecutive days`;
+    case "milestone":
+      return `Complete ${requirement.threshold} day${
+        requirement.threshold > 1 ? "s" : ""
+      } of tracking`;
+    case "activity_limit":
+      return `Keep ${requirement.activity} under ${requirement.threshold} ${requirement.period}`;
+    case "tips_applied":
+      return `Apply ${requirement.threshold} eco-friendly tips`;
+    case "consistency":
+      return `Maintain consistent eco-friendly activity tracking`;
+    default:
+      return "Complete the requirement to unlock this badge";
+  }
 }
 
 function BadgeCard({ badge, isEarned, onClick }: BadgeCardProps) {
@@ -56,10 +78,7 @@ function BadgeCard({ badge, isEarned, onClick }: BadgeCardProps) {
           </svg>
 
           <span className="text-white ">
-            This badge is earned by achieving a total CO₂ reduction of at least{" "}
-            {"  "}
-            {badge.requirement.threshold}% over a {badge.requirement.period}{" "}
-            period.
+            {getBadgeRequirementDescription(badge.requirement)}
           </span>
         </div>
       }
