@@ -13,6 +13,7 @@ import ShareButton from "@/components/ui/ShareButton";
 import { getUserFootprints } from "@/lib/firebase/firestore";
 import { exportToCSV, ActivityHistoryEntry } from "@/utils/exportCSV";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import EmptyState from "@/components/ui/EmptyState"; // Import EmptyState
 
 type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact";
 
@@ -238,21 +239,16 @@ export default function Dashboard({
     );
   }
 
-  if (!dashboardData) {
+  if (!dashboardData || activityHistory.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <span className="text-6xl mb-4 block">🌱</span>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome to Carbon Tracker!
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Start tracking your digital activities to see your carbon footprint.
-          </p>
-          <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-            Add Your First Activity
-          </button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <EmptyState
+          icon="🌱 🌍 🌿"
+          title="Start Your Green Journey!"
+          description="No activities tracked yet. Begin logging your digital activities to see your carbon footprint and get personalized eco-friendly tips!"
+          actionLabel="➕ Log Your First Activity"
+          onAction={() => onNavigate("activities")}
+        />
       </div>
     );
   }
