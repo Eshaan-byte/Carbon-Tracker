@@ -17,6 +17,7 @@ const mockDashboardData: DashboardData = {
     cloud_storage: 20,
     gaming: 30,
     social_media: 10,
+    music_streaming: 30,
   },
   trend: [
     { date: "Mon", co2: 320 },

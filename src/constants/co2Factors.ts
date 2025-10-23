@@ -9,6 +9,7 @@ export const CO2_FACTORS: Record<ActivityType, number> = {
   cloud_storage: 0.5, // grams per GB per day
   gaming: 60, // grams per hour
   social_media: 12, // grams per hour
+  music_streaming: 8,
 };
 
 // Real-world equivalents for context
@@ -44,9 +45,10 @@ export const ACTIVITY_LABELS: Record<ActivityType, string> = {
   cloud_storage: ACTIVITY_TYPES.cloud_storage.label,
   gaming: ACTIVITY_TYPES.gaming.label,
   social_media: ACTIVITY_TYPES.social_media.label,
+  music_streaming: ACTIVITY_TYPES.music_streaming.label,
 };
 
-// Activity descriptions - derived from ACTIVITY_TYPES (concise, under 10 words each)
+// Activity descriptions
 export const ACTIVITY_DESCRIPTIONS: Record<ActivityType, string> = {
   emails: ACTIVITY_TYPES.emails.description,
   streaming: ACTIVITY_TYPES.streaming.description,
@@ -55,4 +57,5 @@ export const ACTIVITY_DESCRIPTIONS: Record<ActivityType, string> = {
   cloud_storage: ACTIVITY_TYPES.cloud_storage.description,
   gaming: ACTIVITY_TYPES.gaming.description,
   social_media: ACTIVITY_TYPES.social_media.description,
+  music_streaming: ACTIVITY_TYPES.music_streaming.description,
 };
