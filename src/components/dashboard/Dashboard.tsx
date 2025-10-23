@@ -14,6 +14,7 @@ import { getUserFootprints } from "@/lib/firebase/firestore";
 import { exportToCSV, ActivityHistoryEntry } from "@/utils/exportCSV";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import Spinner from "@/components/ui/Spinner";
+import TipOfTheDay from "@/components/tips/TipOfTheDay";
 
 type SortOption = "newest" | "oldest" | "highest_impact" | "lowest_impact";
 
@@ -287,6 +288,31 @@ export default function Dashboard({
               period="today"
             />
           </div>
+        </div>
+
+        {/* Tip of the Day */}
+        <TipOfTheDay />
+
+        {/* Stats Cards */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <StatCard
+            title="Today's Footprint"
+            value={formatCO2Amount(dashboardData.todayFootprint)}
+            icon="📅"
+            color="text-blue-600"
+          />
+          <StatCard
+            title="This Week"
+            value={formatCO2Amount(dashboardData.weeklyFootprint)}
+            icon="📊"
+            color="text-green-600"
+          />
+          <StatCard
+            title="This Month"
+            value={formatCO2Amount(dashboardData.monthlyFootprint)}
+            icon="📈"
+            color="text-purple-600"
+          />
         </div>
 
         {/* Stats Cards */}
