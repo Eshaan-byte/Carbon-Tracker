@@ -10,7 +10,7 @@ import {
 import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
 import ShareButton from "@/components/ui/ShareButton";
-import { getUserFootprints } from "@/lib/firebase/firestore";
+import { getUserFootprints, subscribeToUserActivitiesCount } from "@/lib/firebase/firestore";
 import { exportToCSV, ActivityHistoryEntry } from "@/utils/exportCSV";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import Spinner from "@/components/ui/Spinner";
@@ -30,11 +30,12 @@ interface StatCardProps {
   change?: number;
   icon: string;
   color: string;
+  tooltip?: string;
 }
 
-function StatCard({ title, value, change, icon, color }: StatCardProps) {
+function StatCard({ title, value, change, icon, color, tooltip }: StatCardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition" title={tooltip}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-600 text-sm font-medium">{title}</p>
@@ -102,6 +103,7 @@ export default function Dashboard({
     null
   );
   const [loading, setLoading] = useState(true);
+  const [activitiesCount, setActivitiesCount] = useState(0);
   const [exportStatus, setExportStatus] = useState<{
     show: boolean;
     success: boolean;
@@ -214,6 +216,12 @@ export default function Dashboard({
     }
   }, [propDashboardData]);
 
+  // Real-time subscription to activities count
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = subscribeToUserActivitiesCount(user.id, setActivitiesCount);
+    return () => unsubscribe();
+  }, [user, activityHistory.length]);
   // Handle CSV export
   const handleExportCSV = () => {
     const result = exportToCSV(activityHistory as ActivityHistoryEntry[]);
@@ -269,6 +277,11 @@ export default function Dashboard({
 
   const equivalentIcons = ["🚗", "📱", "☕", "💡"];
 
+  // Format join date for tooltip
+  const joinDateLabel = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString()
+    : '';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -290,7 +303,7 @@ export default function Dashboard({
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-4 gap-6">
           <StatCard
             title="Today's Footprint"
             value={formatCO2Amount(dashboardData.todayFootprint)}
@@ -308,6 +321,13 @@ export default function Dashboard({
             value={formatCO2Amount(dashboardData.monthlyFootprint)}
             icon="📈"
             color="text-purple-600"
+          />
+          <StatCard
+            title="Activities Tracked"
+            value={`${activitiesCount.toLocaleString()} activities tracked`}
+            icon="📈"
+            color="text-indigo-600"
+            tooltip={`since ${joinDateLabel}`}
           />
         </div>
 
