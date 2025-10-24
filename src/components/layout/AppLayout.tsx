@@ -11,7 +11,7 @@ import GoalsPanel from "@/components/gamification/GoalsPanel";
 import BadgeDisplay from "@/components/gamification/BadgeDisplay";
 import { ActivityInput } from "@/types";
 import { calculateCarbonFootprint } from "@/lib/calculations/carbonFootprint";
-import { saveCarbonFootprint, saveActivity } from "@/lib/firebase/firestore";
+import { saveCarbonFootprint, saveActivity, deleteActivitys } from "@/lib/firebase/firestore";
 import { ShortcutsModal } from "../ui/ShortcutsModal";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import QuickActionsFAB from "@/components/ui/QuickActionsFAB";
@@ -28,6 +28,7 @@ export default function AppLayout() {
   const [currentPage, setCurrentPage] = useState<PageType>("dashboard");
   const [todayFootprint, setTodayFootprint] = useState(0);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [failToast, setFailToast] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -65,6 +66,52 @@ useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, newSort);
   };
 
+  const handleDeleteActivity = async (
+    id:string, 
+    dateString: string, 
+    activities: any,
+    totalCO2: number,
+    customToastMessage?: string
+     ) => {
+
+      const newTodayFootprint = todayFootprint - totalCO2;
+      setTodayFootprint(newTodayFootprint);
+
+    // In development mode, simulate saving with shorter delay
+    if (process.env.NODE_ENV === "development") {
+      setActivityHistory((prev) => prev.filter((activity) => activity.id !== id));
+      setSuccessToast(customToastMessage || "Activities saved successfully!");
+      setTimeout(() => setSuccessToast(null), 3000);
+      return;
+    }
+
+    try{
+      // Loop through activities and delete each from Firestore
+      if (activities) {
+        const deletionPromises = Object.entries(activities)
+          .filter(([_, value]) => value as number > 0)
+          .map(([activityType, _]) => 
+            deleteActivitys({
+              rawDateString: dateString,
+              userId: user!.id,
+              activityType: activityType
+            })
+          );
+
+        // Wait for all deletions to finish
+        await Promise.all(deletionPromises);
+
+        // Now update state and show toast
+        setActivityHistory((prev) => prev.filter((activity) => activity.id !== id));
+        setSuccessToast(customToastMessage || "Activity deleted successfully!");
+        setTimeout(() => setSuccessToast(null), 3000);
+      }
+    }catch(error){
+      setTodayFootprint((prev) => prev + totalCO2);
+      setFailToast(customToastMessage || "An error occurred while deleting activity.");
+      setTimeout(() => setFailToast(null), 3000);
+    }
+  }
   const getSortedActivityHistory = () => {
     // We create a shallow copy to ensure we don't mutate the original state
     const sortedList = [...activityHistory];
@@ -269,6 +316,7 @@ useEffect(() => {
             sortPreference={sortPreference}
             onSortChange={handleSortChange}
             onNavigate={setCurrentPage}
+            onDeleteActivity={handleDeleteActivity}
           />
         );
 
@@ -405,6 +453,15 @@ useEffect(() => {
         </div>
       )}
 
+      {/* Failed Toast */}
+      {failToast && (
+        <div className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse">
+          <div className="flex items-center space-x-2">
+            <span className="text-lg">❌</span>
+            <span className="font-medium">{failToast}</span>
+          </div>
+        </div>
+      )}
       {/* Mobile spacing for bottom navigation */}
       <div className="h-16 lg:hidden"></div>
 
