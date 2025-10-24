@@ -10,7 +10,7 @@ import {
 import FootprintChart from "@/components/charts/FootprintChart";
 import ComparisonSection from "@/components/dashboard/ComparisonSection";
 import ShareButton from "@/components/ui/ShareButton";
-import { getUserFootprints, subscribeToUserSubmissionCount } from "@/lib/firebase/firestore";
+import { getUserFootprints, subscribeToUserActivitiesCount } from "@/lib/firebase/firestore";
 import { exportToCSV, ActivityHistoryEntry } from "@/utils/exportCSV";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
@@ -101,7 +101,7 @@ export default function Dashboard({
     null
   );
   const [loading, setLoading] = useState(true);
-  const [submissionCount, setSubmissionCount] = useState(0);
+  const [activitiesCount, setActivitiesCount] = useState(0);
   const [exportStatus, setExportStatus] = useState<{
     show: boolean;
     success: boolean;
@@ -214,10 +214,10 @@ export default function Dashboard({
     }
   }, [propDashboardData]);
 
-  // Real-time subscription to submission count
+  // Real-time subscription to activities count
   useEffect(() => {
     if (!user) return;
-    const unsubscribe = subscribeToUserSubmissionCount(user.id, setSubmissionCount);
+    const unsubscribe = subscribeToUserActivitiesCount(user.id, setActivitiesCount);
     return () => unsubscribe();
   }, [user, activityHistory.length]);
   // Handle CSV export
@@ -314,7 +314,7 @@ export default function Dashboard({
           />
           <StatCard
             title="Activities Tracked"
-            value={`${submissionCount.toLocaleString()} tracked`}
+            value={`${activitiesCount.toLocaleString()} activities tracked`}
             icon="📈"
             color="text-indigo-600"
             tooltip={`since ${joinDateLabel}`}

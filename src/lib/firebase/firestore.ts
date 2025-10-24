@@ -174,3 +174,16 @@ export const subscribeToUserSubmissionCount = (
   });
   return unsubscribe; 
 };
+
+// Real-time subscription to count of user's individual activities
+export const subscribeToUserActivitiesCount = (
+  userId: string,
+  onCount: (count: number) => void
+) => {
+  const activitiesRef = collection(db, 'activities');
+  const q = query(activitiesRef, where('userId', '==', userId));
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    onCount(snapshot.size);
+  });
+  return unsubscribe;
+};
